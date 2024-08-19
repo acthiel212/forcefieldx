@@ -140,6 +140,10 @@ class BAR extends AlgorithmsScript {
           description = "Specify convergence cutoff for BAR calculation.")
   private double eps = 1.0E-7
 
+   @Option(names = ["--lambdaArray"], paramLabel = "0,0.2,0.25,...,1.0",
+          description = "Custom lambda values as a comma-separated list.")
+  private double[] lambdaArray = [0, 0.2, 0.25, 0.2625, 0.275, 0.2875, 0.29375, 0.3, 0.30625, 0.3125, 0.31875, 0.325, 0.33125, 0.3375, 0.35, 0.3625, 0.3875, 0.4, 0.425, 0.45, 0.475, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.975, 1]
+
   /**
    * The final argument(s) should be filenames for lambda windows in order.
    */
