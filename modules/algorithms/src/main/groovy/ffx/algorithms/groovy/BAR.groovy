@@ -91,39 +91,39 @@ class BAR extends AlgorithmsScript {
   private TopologyOptions topology
 
   @Option(names = ["--l2", "--lambdaTwo"], paramLabel = "1.0",
-      description = "Lambda value for the upper edge of the window")
+          description = "Lambda value for the upper edge of the window")
   private double lambda2 = 1.0
 
   @Option(names = ["-t", "--temperature"], paramLabel = "298.15",
-      description = "Temperature for system")
+          description = "Temperature for system")
   private double temperature = 298.15
 
   @Option(names = ["--dV", "--volume"], paramLabel = "false",
-      description = "Write out snapshot volumes to the Tinker BAR file.")
+          description = "Write out snapshot volumes to the Tinker BAR file.")
   private boolean includeVolume = false
 
   @Option(names = ["--tb", "--tinkerBAR"], paramLabel = "false",
-      description = "Write out a Tinker BAR file.")
+          description = "Write out a Tinker BAR file.")
   private boolean tinkerBAR = false
 
   @Option(names = ["--nw", "--nWindows"], paramLabel = "-1",
-      description = "If set, auto-determine lambda values and subdirectories (overrides other flags).")
+          description = "If set, auto-determine lambda values and subdirectories (overrides other flags).")
   private int nWindows = -1
 
   @Option(names = ["--utb", "--useTinker"], paramLabel = "false",
-      description = "If set, use tinker BAR files for energy snapshots.")
+          description = "If set, use tinker BAR files for energy snapshots.")
   private boolean useTinkerBAR = false
 
   @Option(names = ["--sa", "--sortedArc"], paramLabel = "false",
-      description = "If set, use sorted archive values.")
+          description = "If set, use sorted archive values.")
   private boolean sortedArc = false
 
   @Option(names = ["--ss", "--startSnapshot"], paramLabel = "0",
-      description = "Start at this snapshot when reading in tinker BAR files.")
+          description = "Start at this snapshot when reading in tinker BAR files.")
   private int startingSnapshot = 0
 
   @Option(names = ["--es", "--endSnapshot"], paramLabel = "0",
-      description = "End at this snapshot when reading in tinker BAR files.")
+          description = "End at this snapshot when reading in tinker BAR files.")
   private int endingSnapshot = 0
 
   /**
@@ -140,16 +140,11 @@ class BAR extends AlgorithmsScript {
           description = "Specify convergence cutoff for BAR calculation.")
   private double eps = 1.0E-7
 
-  @Option(names = ["--lambdaArray"], paramLabel = "0,0.2,0.25,...,1.0",
-          description = "Custom lambda values as a comma-separated list.")
-  private double[] lambdaArray = [0, 0.2, 0.25, 0.2625, 0.275, 0.2875, 0.29375, 0.3, 0.30625, 0.3125, 0.31875, 0.325, 0.33125, 0.3375, 0.35, 0.3625, 0.3875, 0.4, 0.425, 0.45, 0.475, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.975, 1]
-
-
   /**
    * The final argument(s) should be filenames for lambda windows in order.
    */
   @Parameters(arity = "1..*", paramLabel = "files",
-      description = 'A single PDB/XYZ when windows are auto-determined (or two for dual topology). Two trajectory files for BAR between two ensembles (or four for dual topology).')
+          description = 'A single PDB/XYZ when windows are auto-determined (or two for dual topology). Two trajectory files for BAR between two ensembles (or four for dual topology).')
   List<String> filenames = null
 
   /**
@@ -413,29 +408,32 @@ class BAR extends AlgorithmsScript {
     }
 
 
-
-    if (nWindows > 1) {
-      autodetect = true
-      // Auto-determine subdirectories and their lambda values.
-      for (int i = 0; i < nWindows; i++) {
-        for (int j = 0; j < nFiles; j++) {
-          String fullPathToFile = FilenameUtils.getFullPath(files[j])
-          String directoryFullPath = fullPathToFile.replace(files[j], "") + i
-          windowDirectories.add(directoryFullPath + File.separator + i)
-        }
-      }
-      lambdaValues = new double[nWindows]
-      for (int i = 0; i < nWindows; i++) {
-        lambdaValues[i] = alchemical.getInitialLambda(nWindows, i, true)
-      }
+    if (lambdaArray !=null && lambdaArray.size() > 0) {
+      nWindows = lambdaArray.size()
+      lambdaValues = lambdaArray as double[]
     } else {
-      // Otherwise we assume two ensembles at then given lambda values.
-      lambdaValues = new double[2]
-      lambdaValues[0] = alchemical.getInitialLambda()
-      lambdaValues[1] = lambda2
-      nWindows = 2
+      if (nWindows > 1) {
+        autodetect = true
+        // Auto-determine subdirectories and their lambda values.
+        for (int i = 0; i < nWindows; i++) {
+          for (int j = 0; j < nFiles; j++) {
+            String fullPathToFile = FilenameUtils.getFullPath(files[j])
+            String directoryFullPath = fullPathToFile.replace(files[j], "") + i
+            windowDirectories.add(directoryFullPath + File.separator + i)
+          }
+        }
+        lambdaValues = new double[nWindows]
+        for (int i = 0; i < nWindows; i++) {
+          lambdaValues[i] = alchemical.getInitialLambda(nWindows, i, true)
+        }
+      } else {
+        // Otherwise we assume two ensembles at then given lambda values.
+        lambdaValues = new double[2]
+        lambdaValues[0] = alchemical.getInitialLambda()
+        lambdaValues[1] = lambda2
+        nWindows = 2
+      }
     }
-
     // Could set "getInitialLambda"'s quiet flag to false, but better logging here?
     logger.info(" Lambda values for each window: ")
     int nLambda = lambdaValues.length;
@@ -495,7 +493,7 @@ class BAR extends AlgorithmsScript {
     }
 
     StringBuilder sb = new StringBuilder(format(
-        "\n Using BAR to analyze a free energy change for %s\n ", filenames))
+            "\n Using BAR to analyze a free energy change for %s\n ", filenames))
     potential = (CrystalPotential) topology.assemblePotential(molecularAssemblies, threadsAvail, sb)
     Crystal unitCell = potential.getCrystal().getUnitCell()
 
@@ -1012,13 +1010,13 @@ class BAR extends AlgorithmsScript {
   }
 
   private double[] getEnergyForLambdas(MolecularAssembly[] topologies, double[] lambdaValues,
-      String[] arcFileName, double[][] energy, boolean isPBC, int nSymm) {
+                                       String[] arcFileName, double[][] energy, boolean isPBC, int nSymm) {
     for (int j = 0; j < numTopologies; j++) {
       File archiveFile = new File(arcFileName[j])
       openers[j].setFile(archiveFile)
       topologies[j].setFile(archiveFile)
       StringBuilder sb = new StringBuilder(format(
-          "\n Evaluating energies for %s\n ", arcFileName[j]))
+              "\n Evaluating energies for %s\n ", arcFileName[j]))
       logger.info(sb as String)
     }
     int nSnapshots = openers[0].countNumModels()
@@ -1037,13 +1035,13 @@ class BAR extends AlgorithmsScript {
 
     if (arcFileName[0].contains(endWindows)) {
       logger.info(format(" %s     %s   %s     %s   %s ", "Snapshot", "Lambda Low",
-          "Energy Low", "Lambda At", "Energy At"))
+              "Energy Low", "Lambda At", "Energy At"))
     } else if (arcFileName[0].contains("0/")) {
       logger.info(format(" %s     %s   %s     %s   %s ", "Snapshot", "Lambda At",
-          "Energy At", "Lambda High", "Energy High"))
+              "Energy At", "Lambda High", "Energy High"))
     } else {
       logger.info(format(" %s     %s   %s     %s   %s     %s   %s ", "Snapshot", "Lambda Low",
-          "Energy Low", "Lambda At", "Energy At", "Lambda High", "Energy High"))
+              "Energy Low", "Lambda At", "Energy At", "Lambda High", "Energy High"))
     }
 
     for (int i = 0; i < nSnapshots; i++) {
@@ -1064,18 +1062,18 @@ class BAR extends AlgorithmsScript {
 
       if (nLambdas == 2) {
         logger.info(format(" %8d     %6.3f   %14.4f     %6.3f   %14.4f ", i + 1, lambdaValues[0],
-            energy[0][i], lambdaValues[1], energy[1][i]))
+                energy[0][i], lambdaValues[1], energy[1][i]))
       } else {
         logger.info(format(" %8d     %6.3f   %14.4f     %6.3f   %14.4f     %6.3f   %14.4f ", i + 1,
-            lambdaValues[0],
-            energy[0][i], lambdaValues[1], energy[1][i], lambdaValues[2], energy[2][i]))
+                lambdaValues[0],
+                energy[0][i], lambdaValues[1], energy[1][i], lambdaValues[2], energy[2][i]))
       }
 
       if (isPBC) {
         Crystal unitCell = potential.getCrystal().getUnitCell()
         vol[i] = unitCell.volume / nSymm
         logger.info(format(" %8d %14.4f",
-            i + 1, vol[i]))
+                i + 1, vol[i]))
       }
     }
 
