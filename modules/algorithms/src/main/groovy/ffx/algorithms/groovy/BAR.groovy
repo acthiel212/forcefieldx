@@ -140,9 +140,21 @@ class BAR extends AlgorithmsScript {
           description = "Specify convergence cutoff for BAR calculation.")
   private double eps = 1.0E-7
 
-   @Option(names = ["--lambdaArray"], paramLabel = "0,0.2,0.25,...,1.0",
+  @Option(names = ["--lambdaArray"], paramLabel = "0,0.2,0.25,...,1.0",
           description = "Custom lambda values as a comma-separated list.")
-  private double[] lambdaArray = [0, 0.2, 0.25, 0.2625, 0.275, 0.2875, 0.29375, 0.3, 0.30625, 0.3125, 0.31875, 0.325, 0.33125, 0.3375, 0.35, 0.3625, 0.3875, 0.4, 0.425, 0.45, 0.475, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.975, 1]
+  private String lambdaArrayStr;
+
+  private double[] lambdaArray;
+
+  public void parseLambdaArray() {
+    if (lambdaArrayStr != null && !lambdaArrayStr.isEmpty()) {
+      String[] tokens = lambdaArrayStr.split(",");
+      lambdaArray = new double[tokens.length];
+      for (int i = 0; i < tokens.length; i++) {
+        lambdaArray[i] = Double.parseDouble(tokens[i].trim());
+      }
+    }
+  }
 
   /**
    * The final argument(s) should be filenames for lambda windows in order.
@@ -392,7 +404,15 @@ class BAR extends AlgorithmsScript {
     }
 
     numTopologies = 1
-    if (nFiles <= 1 && nWindows < 2) {
+    if (lambdaArrayStr != null) {
+      parseLambdaArray();
+      nWindows=lambdaArray.size();
+      System.out.println("Lambda Array: " + Arrays.toString(lambdaArray));
+    } else {
+      System.out.println("Lambda Array is null");
+    }
+
+    if (nFiles <= 1 && nWindows < 2 && lambdaArray == null) {
       logger.info(' At least two ensembles must be specified')
       return this
     } else if (nFiles == 1 && nWindows >= 2) {
@@ -412,32 +432,39 @@ class BAR extends AlgorithmsScript {
     }
 
 
-    if (lambdaArray !=null && lambdaArray.size() > 0) {
-      nWindows = lambdaArray.size()
-      lambdaValues = lambdaArray as double[]
-    } else {
-      if (nWindows > 1) {
-        autodetect = true
-        // Auto-determine subdirectories and their lambda values.
-        for (int i = 0; i < nWindows; i++) {
-          for (int j = 0; j < nFiles; j++) {
-            String fullPathToFile = FilenameUtils.getFullPath(files[j])
-            String directoryFullPath = fullPathToFile.replace(files[j], "") + i
-            windowDirectories.add(directoryFullPath + File.separator + i)
-          }
+    if (lambdaArray != null && lambdaArray.size() > 0) {
+      autodetect = true
+      nWindows = lambdaArray.size();
+      lambdaValues = lambdaArray as double[];
+      for (int i = 0; i < nWindows; i++) {
+        for (int j = 0; j < nFiles; j++) {
+          String fullPathToFile = FilenameUtils.getFullPath(files[j]);
+          String directoryFullPath = fullPathToFile.replace(files[j], "") + i;
+          windowDirectories.add(directoryFullPath + File.separator + i);
         }
-        lambdaValues = new double[nWindows]
-        for (int i = 0; i < nWindows; i++) {
-          lambdaValues[i] = alchemical.getInitialLambda(nWindows, i, true)
-        }
-      } else {
-        // Otherwise we assume two ensembles at then given lambda values.
-        lambdaValues = new double[2]
-        lambdaValues[0] = alchemical.getInitialLambda()
-        lambdaValues[1] = lambda2
-        nWindows = 2
       }
+    } else if (nWindows > 1) {
+      autodetect = true;
+      // Auto-determine subdirectories and their lambda values.
+      for (int i = 0; i < nWindows; i++) {
+        for (int j = 0; j < nFiles; j++) {
+          String fullPathToFile = FilenameUtils.getFullPath(files[j]);
+          String directoryFullPath = fullPathToFile.replace(files[j], "") + i;
+          windowDirectories.add(directoryFullPath + File.separator + i);
+        }
+      }
+      lambdaValues = new double[nWindows];
+      for (int i = 0; i < nWindows; i++) {
+        lambdaValues[i] = alchemical.getInitialLambda(nWindows, i, true);
+      }
+    } else {
+      // Default case for when nWindows is not set and no lambdaArray is provided.
+      lambdaValues = new double[2];
+      lambdaValues[0] = alchemical.getInitialLambda();
+      lambdaValues[1] = lambda2;
+      nWindows = 2;
     }
+
     // Could set "getInitialLambda"'s quiet flag to false, but better logging here?
     logger.info(" Lambda values for each window: ")
     int nLambda = lambdaValues.length;
