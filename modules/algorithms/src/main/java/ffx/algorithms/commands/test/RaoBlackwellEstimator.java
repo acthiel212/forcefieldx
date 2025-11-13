@@ -91,6 +91,10 @@ public class RaoBlackwellEstimator extends AlgorithmsCommand {
           description = "Specified residues are set to discrete state when doing analysis.")
   private double discreteState = 0.0;
 
+  @Option(names = {"--chain", "--ch"}, paramLabel = " ", defaultValue = "A",
+    description = "Single character chain name (default is \'A\').")
+  private Character chain = 'A';
+
   @Option(names = {"--bootstrapIter"}, paramLabel = "100000", defaultValue = "100000",
           description = "Number of bootstrap iterations. Set -1 for no bootstrapping.")
   private int bootstrapIter;
@@ -184,7 +188,7 @@ public class RaoBlackwellEstimator extends AlgorithmsCommand {
     } else if (esvSystem.getSpecialResidueList().size() == 1) {
       int specialResidueNumber = esvSystem.getSpecialResidueList().get(0).intValue();
       for (Residue residue : esvSystem.getTitratingResidueList()) {
-        if (residue.getResidueNumber() == specialResidueNumber) {
+        if (residue.getResidueNumber() == specialResidueNumber && residue.getChainID() == chain) {
           specialResidue = residue;
         }
       }
@@ -250,7 +254,7 @@ public class RaoBlackwellEstimator extends AlgorithmsCommand {
       }
       int index=0;
       for (Residue residue : esvSystem.getTitratingResidueList()) {
-        if (ArrayUtils.contains(dsResidueNums, residue.getResidueNumber())) {
+        if (ArrayUtils.contains(dsResidueNums, residue.getResidueNumber()) && residue.getChainID() == chain) {
           dsResidues[index] = residue;
           index++;
         }
@@ -261,7 +265,7 @@ public class RaoBlackwellEstimator extends AlgorithmsCommand {
     if(specifiedResidues != null){
       for (int i = 0; i < esvSystem.getTitratingResidueList().size(); i++) {
         Residue residue = esvSystem.getTitratingResidueList().get(i);
-        if (ArrayUtils.contains(specifiedResidues, residue.getResidueNumber())) {
+        if (ArrayUtils.contains(specifiedResidues, residue.getResidueNumber()) && residue.getChainID() == chain) {
           onlyResidues.add(residue);
           onlyResidueIndices.add(i);
         }
