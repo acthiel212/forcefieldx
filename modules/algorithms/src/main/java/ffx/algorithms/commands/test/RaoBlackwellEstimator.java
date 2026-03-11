@@ -243,9 +243,9 @@ public class RaoBlackwellEstimator extends AlgorithmsCommand {
       }
     }
 
-    int[] dsResidueNums = null;
+    int[] dsResidueNums;
     Residue[] dsResidues = null;
-    if(discreteStateResidues != ""){
+    if(discreteStateResidues != null && !discreteStateResidues.isEmpty()){
       String[] discreteStateResiduesString = discreteStateResidues.split(",");
       dsResidueNums = new int[discreteStateResiduesString.length];
       dsResidues = new Residue[dsResidueNums.length];
