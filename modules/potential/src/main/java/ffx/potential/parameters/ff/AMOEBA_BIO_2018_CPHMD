@@ -8401,7 +8401,7 @@ multipole     49     43     8          -0.85155 \
                                        -0.20334  0.00000  3.07320
 
 # Changed the partial charge from (q = -0.08027) by (-0.293) to below to maintain charge neutrality with new HB multipole definition
-multipole     43     8     49           -0.373272 \
+multipole     43     8     49           -0.37306 \
                                         0.13313  0.00000  0.28094 \
                                        -0.73267 \
                                         0.00000  0.44660 \
