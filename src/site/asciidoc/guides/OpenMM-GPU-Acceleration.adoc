@@ -1,0 +1,54 @@
+= Using OpenMM and GPU Acceleration with Force Field X (FFX)
+:toc:
+:icons: font
+
+This guide summarizes how to run FFX MD on GPUs via the OpenMM engine, select devices, and tune precision/performance.
+
+== Selecting the OpenMM engine
+
+Most MD-capable commands accept `--molecularDynamicsEngine {OpenMM|FFX}`. Choose `OpenMM` to utilize GPU acceleration when available:
+```
+ffxc Dynamics --molecularDynamicsEngine OpenMM input.pdb
+```
+
+== Device selection
+
+Device selection depends on your platform and installation. Common approaches:
+- Set environment variables before launching `ffxc` (examples):
+  - CUDA: `CUDA_VISIBLE_DEVICES=0` selects GPU 0.
+  - OpenCL: `OPENCL_PLATFORM_INDEX=0` and `OPENCL_DEVICE_INDEX=0`.
+- JVM system properties recognized by the FFX/OpenMM binding may include:
+  - `-DnumCudaDevices=1` (limit visible CUDA devices)
+  - `-Dopenmm.platform=CUDA` or `-Dopenmm.platform=OpenCL` (prefer a platform)
+
+Example with Maven launcher and a preferred platform:
+```
+mvn -q -pl modules/ffx-all -Pcli \
+  -Dexec.args="Dynamics --molecularDynamicsEngine OpenMM input.pdb" \
+  -Dopenmm.platform=CUDA \
+  exec:java
+```
+
+== Precision modes
+
+OpenMM supports multiple precision modes that trade speed for accuracy:
+- Single (fastest), Mixed (good default), Double (slowest, highest precision).
+
+Select via environment variable or property depending on your install. Examples:
+- `OPENMM_DEFAULT_PRECISION=mixed`
+- `-Dopenmm.precision=mixed`
+
+Check FFX/OpenMM logs to confirm the selected platform and precision at startup.
+
+== Performance tips
+
+- Keep time step conservative for AMOEBA (e.g., `--dt 1.0` fs) unless validated.
+- Minimize CPU–GPU data transfers: avoid overly frequent `--write` and `--report`.
+- Ensure the GPU is not oversubscribed by other processes; monitor with `nvidia-smi`.
+- Pin CPU threads appropriately; on shared nodes, reserve sufficient CPU cores.
+
+== Troubleshooting
+
+- OpenMM not found: Verify your installation and library paths (e.g., `LD_LIBRARY_PATH`) include OpenMM; ensure versions are compatible with FFX.
+- Wrong device/platform: Explicitly set `CUDA_VISIBLE_DEVICES` or `-Dopenmm.platform`.
+- Crashes under high load: Reduce `--dt`, use Mixed precision, update GPU drivers.

@@ -1,0 +1,354 @@
+= Using Force Field X (FFX)
+
+:toc: macro
+:toclevels: 3
+:icons: font
+
+This guide introduces the Force Field X (FFX) command‑line interface and shows how to use the most common commands.
+It is organized to first cover commands in the `Potential` package, then commands in the `Algorithms` package.
+Where available, each command name links to its detailed manpage generated from the codebase.
+
+FFX commands are run via the `ffxc` launcher (installed with FFX). For example:
+
+```
+ffxc Energy protein.pdb
+```
+
+If `ffxc` is not on your `PATH`, you can run commands via Maven during development:
+
+```
+mvn -q -pl modules/ffx-all -Pcli -Dexec.args="Energy protein.pdb" exec:java
+```
+
+TIP: Most commands accept PDB (`.pdb`) or XYZ (`.xyz`) structure files as input, and many commands support multi‑model ARC files (`.arc`).
+
+== Conventions
+
+- Coordinate files: `file.pdb`, `file.xyz`, or trajectory `file.arc`.
+- Force field selection: via `.key` files in the working directory or `-D` system properties. Common keys live under `PARAMS/` in the repo and in your installation.
+- Threading: many commands use multithreading; see per‑command options.
+- Selection: many commands accept atom selection and topology options via shared mixins; see the command manpage for details.
+
+== Potential Commands
+
+The `Potential` package contains utilities for preparing, converting, and evaluating molecular systems.
+
+[cols="1,3,3,5"]
+|===
+| Command | Purpose | Basic Usage | Notes
+
+| link:commands/Biotype.adoc[Biotype]
+| List or assign biotypes and atom classes.
+| `ffxc Biotype file.pdb`
+| Useful for checking biotype assignments before parameterization.
+
+| link:commands/Cart2Frac.adoc[Cart2Frac]
+| Convert Cartesian coordinates to fractional using a unit cell.
+| `ffxc Cart2Frac file.pdb`
+| Requires crystal parameters from file or key.
+
+| link:commands/ChainBreaks.adoc[ChainBreaks]
+| Detect chain breaks in polymers.
+| `ffxc ChainBreaks file.pdb`
+| Flags residues separated by large bond distances.
+
+| link:commands/Density.adoc[Density]
+| Analyze or adjust density of a system or ARC.
+| `ffxc Density file.arc`
+| Can write filtered ARC based on density threshold.
+
+| link:commands/Energy.adoc[Energy]
+| Compute potential energy (and optionally gradients) for structures.
+| `ffxc Energy [-g] [--verbose] file.{pdb|xyz|arc}`
+| Supports atom selection, alchemical and topology options; can report Rg and inertia.
+
+| link:commands/ExportQE.adoc[ExportQE]
+| Export structures and parameters for Quantum ESPRESSO.
+| `ffxc ExportQE file.pdb`
+| Generates QE‑compatible input artifacts.
+
+| link:commands/Fasta.adoc[Fasta]
+| Output a FASTA sequence from a biomolecular structure.
+| `ffxc Fasta file.pdb`
+| Extracts chains and residue sequences.
+
+| link:commands/FeatureMap.adoc[FeatureMap]
+| Compute structure feature maps.
+| `ffxc FeatureMap file.pdb`
+| Property‑driven visualization metrics.
+
+| link:commands/FFtoXML.adoc[FFtoXML]
+| Convert force field parameter files to XML.
+| `ffxc FFtoXML AMOEBA_BIO_2018`
+| Accepts parameter set names or files.
+
+| link:commands/Frac2Cart.adoc[Frac2Cart]
+| Convert fractional coordinates to Cartesian.
+| `ffxc Frac2Cart file.pdb`
+| Inverse of `Cart2Frac`.
+
+| link:commands/ImportCIF.adoc[ImportCIF]
+| Import crystallographic CIF to PDB/XYZ with symmetry.
+| `ffxc ImportCIF structure.cif`
+| Parses space group and unit cell.
+
+| link:commands/MoveIntoUnitCell.adoc[MoveIntoUnitCell]
+| Wrap atoms into the primary unit cell.
+| `ffxc MoveIntoUnitCell file.pdb`
+| Applies minimum‑image convention.
+
+| link:commands/NucleicAcidAnalysis.adoc[NucleicAcidAnalysis]
+| Analyze nucleic acid geometry and parameters.
+| `ffxc NucleicAcidAnalysis file.pdb`
+| Reports base pairing/stacking metrics.
+
+| link:commands/PhEnergy.adoc[PhEnergy]
+| Evaluate energy under constant‑pH parameters for titratables.
+| `ffxc PhEnergy --pH 7.0 file.pdb`
+| See also `PhDynamics`/`PhMinimize` for algorithms.
+
+| link:commands/PrepareSpaceGroups.adoc[PrepareSpaceGroups]
+| Prepare space group data tables.
+| `ffxc PrepareSpaceGroups`
+| Developer utility to regenerate space group metadata.
+
+| link:commands/SaveAsP1.adoc[SaveAsP1]
+| Expand symmetry to P1 and write file.
+| `ffxc SaveAsP1 file.pdb`
+| Removes crystallographic symmetry.
+
+| link:commands/SaveAsPDB.adoc[SaveAsPDB]
+| Write current structure to PDB.
+| `ffxc SaveAsPDB file.xyz`
+| Can control model/chain naming.
+
+| link:commands/SaveAsXYZ.adoc[SaveAsXYZ]
+| Write current structure to XYZ.
+| `ffxc SaveAsXYZ file.pdb`
+| Writes single or multiple models.
+
+| link:commands/Solvator.adoc[Solvator]
+| Build explicit solvent box and (optionally) ions.
+| `ffxc Solvator --water TIP3P --padding 12.0 file.pdb`
+| Several water/ion models supported; see manpage.
+
+| link:commands/Timer.adoc[Timer]
+| Benchmark core kernels on your platform.
+| `ffxc Timer`
+| Helps select optimal compute platform.
+
+| link:commands/Volume.adoc[Volume]
+| Compute volume of a cavity or system.
+| `ffxc Volume file.pdb`
+| Can compute per‑model volumes for ARC.
+
+| link:commands/VolumeArc.adoc[VolumeArc]
+| Compute volumes for each model in an ARC.
+| `ffxc VolumeArc file.arc`
+| Batch volume analysis of trajectories.
+
+| link:commands/WriteRestraints.adoc[WriteRestraints]
+| Generate restraint files (distance, angle, torsion).
+| `ffxc WriteRestraints file.pdb`
+| Useful for structure refinement workflows.
+
+|===
+
+Advanced/testing utilities in `ffx.potential.commands.test` include: `Gradient`, `LambdaGradient`, `PhGradient`, `PrmToProperty`, `ReorderAtoms`, and `SaveAsConstantPhPDB`. See the corresponding manpages under `commands/test.*.adoc` for developer‑oriented details.
+
+=== Quick examples (Potential)
+
+- Compute energy and gradient for a minimized structure:
+```
+ffxc Energy -g minimized.pdb
+```
+
+- Filter an ARC to structures within 1.0 kcal/mol of the minimum and save a new ARC:
+```
+ffxc Energy --ec 1.0 trajectory.arc
+```
+
+- Convert a CIF to PDB and wrap into the primary cell:
+```
+ffxc ImportCIF structure.cif
+ffxc MoveIntoUnitCell structure.pdb
+```
+
+== Algorithms Commands
+
+The `Algorithms` package provides local/global optimization, molecular dynamics, and free‑energy methods.
+
+[cols="1,3,3,5"]
+|===
+| Command | Purpose | Basic Usage | Notes
+
+| link:commands/AnalyzeNEQ.adoc[AnalyzeNEQ]
+| Analyze nonequilibrium switching work/energy.
+| `ffxc AnalyzeNEQ --in work.dat`
+| Post‑processing for NEQ free‑energy calculations.
+
+| link:commands/Anneal.adoc[Anneal]
+| Simulated annealing to escape local minima.
+| `ffxc Anneal file.pdb`
+| Controls for schedule and temperature range.
+
+| link:commands/BAR.adoc[BAR]
+| Bennett Acceptance Ratio estimator.
+| `ffxc BAR --fwd fwd.dat --rev rev.dat`
+| Computes ΔF from forward/reverse work.
+
+| link:commands/Cluster.adoc[Cluster]
+| Cluster structures by RMSD or other metrics.
+| `ffxc Cluster file.arc`
+| Can superpose before clustering; various linkages.
+
+| link:commands/Dynamics.adoc[Dynamics]
+| Molecular dynamics in FFX.
+| `ffxc Dynamics --dt 1.0e-3 --steps 100000 file.pdb`
+| Thermostats, barostats, integrators available; see also `Minimize` pre‑step.
+
+| link:commands/ForEachFile.adoc[ForEachFile]
+| Apply a command to each file matching a pattern.
+| `ffxc ForEachFile "*.pdb" Minimize --eps 1.0e-5`
+| Batch processing utility.
+
+| link:commands/GenZ.adoc[GenZ]
+| Generate z‑matrix or torsion driving grids.
+| `ffxc GenZ file.pdb`
+| Often used prior to `TorsionScan`.
+
+| link:commands/Histogram.adoc[Histogram]
+| Create histograms of energies or properties.
+| `ffxc Histogram file.arc`
+| Useful for diagnosing sampling quality.
+
+| link:commands/ManyBody.adoc[ManyBody]
+| Perform many‑body expansion (MBE) analysis.
+| `ffxc ManyBody file.pdb`
+| Can compute n‑body energy contributions.
+
+| link:commands/MBAR.adoc[MBAR]
+| Multistate Bennett Acceptance Ratio.
+| `ffxc MBAR --states states.dat --u reduced.dat`
+| Free‑energy estimator for multiple states.
+
+| link:commands/Minimize.adoc[Minimize]
+| Local energy minimization.
+| `ffxc Minimize [-e 1.0e-5] file.pdb`
+| Choose algorithm (e.g., LBFGS), tolerance, and max steps.
+
+| link:commands/MinimizeCrystals.adoc[MinimizeCrystals]
+| Periodic crystal minimization.
+| `ffxc MinimizeCrystals file.pdb`
+| Jointly optimizes structure and cell if allowed.
+
+| link:commands/MinimizeOpenMM.adoc[MinimizeOpenMM]
+| Run minimization using OpenMM backend.
+| `ffxc MinimizeOpenMM file.pdb`
+| Useful to compare platform performance.
+
+| link:commands/MutatePDB.adoc[MutatePDB]
+| Introduce point mutations and rebuild.
+| `ffxc MutatePDB --mut A:25K file.pdb`
+| Paves the way for stability or binding studies.
+
+| link:commands/PhDynamics.adoc[PhDynamics]
+| Constant‑pH molecular dynamics.
+| `ffxc PhDynamics --pH 7.0 file.pdb`
+| Coupled protonation state sampling.
+
+| link:commands/PhMinimize.adoc[PhMinimize]
+| Minimize under constant‑pH parameters.
+| `ffxc PhMinimize --pH 7.0 file.pdb`
+| See also `PhEnergy` in Potential.
+
+| link:commands/SaveRotamers.adoc[SaveRotamers]
+| Generate and save side‑chain rotamers.
+| `ffxc SaveRotamers file.pdb`
+| Used for combinatorial searches and design.
+
+| link:commands/Scheduler.adoc[Scheduler]
+| Distribute jobs on local or remote resources.
+| `ffxc Scheduler --in jobs.txt`
+| Utility for larger batch campaigns.
+
+| link:commands/SortArc.adoc[SortArc]
+| Sort multi‑model ARC files by a metric.
+| `ffxc SortArc file.arc`
+| Common metrics include energy, RMSD, or time.
+
+| link:commands/Superpose.adoc[Superpose]
+| Superpose structures (Kabsch/Quaternion).
+| `ffxc Superpose mobile.pdb target.pdb`
+| Aligns and reports RMSDs and transforms.
+
+| link:commands/SuperposeCrystals.adoc[SuperposeCrystals]
+| Superpose periodic crystal structures.
+| `ffxc SuperposeCrystals mobile.pdb target.pdb`
+| Accounts for symmetry and unit cells.
+
+| link:commands/Thermodynamics.adoc[Thermodynamics]
+| Thermodynamic analysis from MD outputs.
+| `ffxc Thermodynamics --in log.arc`
+| Extracts temperatures, energies, and heat capacities.
+
+| link:commands/TorsionScan.adoc[TorsionScan]
+| Scan torsions to generate potential maps.
+| `ffxc TorsionScan --atoms 5,7,9,15 file.pdb`
+| Produces energy vs angle profiles.
+
+|===
+
+Testing/advanced commands under `ffx.algorithms.commands.test` include tools such as `ApplyTorsions`, `CoformerBindingSearch`, `CreateRotamers`, `CrystalSearch`, `FindRestraints`, `Freefix`, `IdentifyRotamers`, `ManyBodyPhScan`, `MostBar`, `OSTGradient`, `RaoBlackwellEstimator`, `RepexThermo`, `SortXPH`, and `WeightedEnsemble`. They are primarily intended for development and validation.
+
+=== Quick examples (Algorithms)
+
+- Minimize, then run a short MD with a Langevin thermostat:
+```
+ffxc Minimize input.pdb
+ffxc Dynamics --dt 0.001 --steps 500000 --thermostat Langevin input.pdb
+```
+
+- Torsion scan around a specified dihedral:
+```
+ffxc TorsionScan --atoms 12,15,18,21 molecule.pdb
+```
+
+- BAR/MBAR analysis from work/energies:
+```
+ffxc BAR --fwd fwd_work.dat --rev rev_work.dat
+ffxc MBAR --states states.dat --u red_potentials.dat
+```
+
+== Input files and force fields
+
+- Key files: `.key` files in the working directory configure nonbonded cutoffs, PME, solvent models, and select force fields (e.g., `forcefield AMOEBA_BIO_2018`).
+- Parameters: FFX ships with AMOEBA and related parameter sets; see `PARAMS/` and `ffx/potential/parameters/ff/`.
+- Constant‑pH: For pH‑enabled workflows, see `PhEnergy`, `PhMinimize`, and `PhDynamics`, and the titration utilities under `ffx.potential.parameters`.
+
+== Platforms and performance
+
+- CPU/GPU selection: FFX selects an available platform automatically; benchmarking via `ffxc Timer` can help choose the fastest.
+- Parallelism: Use environment variables and command options to control threads; many commands parallelize over atoms, residues, or models.
+
+== Getting help
+
+- Manpages: `src/site/asciidoc/commands/*.adoc` or online documentation for each command.
+- CLI help: add `-h` or `--help` to any command, e.g., `ffxc Energy --help`.
+- Listing commands: run the GUI, or in code, see `ffx.utilities.FFXCommand` which enumerates available commands.
+
+== Guides (task-oriented tutorials)
+
+- link:guides/Preparing-a-Structure.adoc[Preparing a Structure]: End-to-end prep from PDB → solvation → minimization → NVT/NPT → production.
+- link:guides/Running-MD.adoc[Running MD]: Practical `Dynamics` usage, thermostats/barostats, I/O, restarts, and performance tips.
+- link:guides/Key-Files-and-Force-Fields.adoc[Key Files and Force Fields]: How `.key` files work, selecting AMOEBA parameter sets, mixing parameters.
+- link:guides/Constant-pH-MD.adoc[Constant-pH MD]: Setup and run `PhEnergy`/`PhMinimize`/`PhDynamics`, titration models.
+- link:guides/Alchemical-Free-Energy.adoc[Alchemical Free Energy]: Dual/quad topologies, lambda schedules, and analysis with `Thermodynamics`.
+- link:guides/OpenMM-GPU-Acceleration.adoc[OpenMM/GPU Acceleration]: Selecting devices, platforms, and precision; tuning performance.
+- link:guides/Troubleshooting-and-Reproducibility.adoc[Troubleshooting & Reproducibility]: Common issues, diagnostics, and reproducible workflows.
+
+== Reproducibility tips
+
+- Record the exact `.key` file and parameter version.
+- Fix random seeds where applicable (MD thermostats, Monte Carlo components).
+- Document software version (see Maven `pom.xml` version or `ffxc --version` if available).

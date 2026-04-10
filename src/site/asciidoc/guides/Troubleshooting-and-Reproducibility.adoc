@@ -1,0 +1,59 @@
+= Troubleshooting and Reproducibility in Force Field X (FFX)
+:toc:
+:icons: font
+
+This guide collects common pitfalls, error patterns, and practical steps to make simulations robust and reproducible.
+
+== Common issues and fixes
+
+=== Missing parameters / unassigned biotypes
+- Symptom: `Energy` or `Dynamics` fails with messages about missing atom types or parameters.
+- Fixes:
+  - Run `ffxc Biotype file.pdb` to inspect biotype/atom-class assignments.
+  - Ensure your `.key` selects a suitable force field, e.g., `forcefield AMOEBA_BIO_2018`.
+  - Add small-molecule parameter files via `parameters my_ligand.prm` in `.key`.
+
+=== Non-periodic vs periodic confusion
+- Symptom: PME not enabled, density meaningless, or infinite system growth.
+- Fixes:
+  - Ensure the input PDB includes `CRYST1` records (produced by `Solvator`).
+  - Confirm logs report periodic boundaries and PME grid initialization.
+
+=== Instabilities at start of MD
+- Symptom: Temperature/energy blow-ups in early steps.
+- Fixes:
+  - Minimize first (`ffxc Minimize`).
+  - Start with NVT and a small time step (e.g., `--dt 1.0` fs) before enabling NPT.
+  - Apply gentle restraints during early equilibration; reduce `--report`/`--write` frequencies to limit I/O overhead.
+
+=== Ion placement and neutrality
+- Symptom: Unexpected charge or bad initial ion contacts.
+- Fixes:
+  - Provide both `.pdb` and matching `.ions` files to `Solvator --ionFile`.
+  - Use `--boundary` and `--randomSeed` to control placement and reproducibility.
+
+=== Restart/resume behavior
+- Symptom: A run unexpectedly continues from a previous state or fails to restart.
+- Fixes:
+  - Remove or rename `.dyn` and history files to force a fresh start.
+  - Set and verify `--checkpoint` frequency; inspect logs for restart file writes.
+
+=== OpenMM GPU selection/precision
+- Symptom: Wrong GPU, performance issues, or crashes.
+- Fixes:
+  - Set `CUDA_VISIBLE_DEVICES` or `-Dopenmm.platform=CUDA` and confirm in logs.
+  - Choose Mixed precision (see OpenMM/GPU guide) and keep `--dt` conservative.
+
+== Reproducibility checklist
+
+- Inputs under version control: structures (`.pdb`/`.xyz`), `.key`, custom parameters (`.prm`/`.xml`).
+- Record software environment: FFX version, Java version, OpenMM version, GPU driver.
+- Fixed seeds where applicable: `--randomSeed` (ions), MD/random components if available.
+- Consistent settings across windows (AFE): thermostats/barostat, `--report`, `--write`, `--checkpoint`.
+- Archive logs and trajectory metadata; prefer text-based logs for long-term storage.
+
+== Diagnostic commands
+
+- `ffxc Energy file.{pdb|xyz|arc}`: quick energy/gradient checks and sanity tests on snapshots.
+- `ffxc Density file.arc`: check and filter by density.
+- `ffxc Timer`: micro-benchmarks to compare platforms and parameter tweaks.

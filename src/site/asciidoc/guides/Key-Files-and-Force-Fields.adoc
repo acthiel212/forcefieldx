@@ -1,0 +1,56 @@
+= Key files and Force Field selection in Force Field X (FFX)
+:toc:
+:icons: font
+
+This guide explains how FFX finds parameters, how to choose a force field, and how to use `.key` files to control simulations reproducibly.
+
+== Force field parameter sets
+
+FFX ships with AMOEBA parameter sets. Common choices:
+- AMOEBA_BIO_2018: Protein/nucleic-acid focused biomolecular parameters.
+- Other AMOEBA variants may be available for small molecules, water, ions.
+
+Ways to select parameters:
+- In a `.key` file in your working directory:
+```
+forcefield AMOEBA_BIO_2018
+```
+- Or via JVM property when launching `ffxc` with Maven: `-Dforcefield=AMOEBA_BIO_2018`.
+
+FFX also reads parameter files listed by `parameters` lines in `.key`, or provided as XML/PRM files alongside structures.
+
+== What is a `.key` file?
+
+A plain-text file named `something.key` in your run directory that sets defaults for all FFX commands. Typical entries:
+```
+# Select force field
+forcefield AMOEBA_BIO_2018
+
+# PME and cutoffs (override defaults if needed)
+# a-ewald 0.545
+# ewald-cutoff 7.0
+# vdw-cutoff 9.0
+# polarization mutual
+
+# Constraints/restraints examples (selection syntax in command docs)
+# restrain-distance 12 45 2.0 100.0
+# freeze atom 1-100
+```
+Place the `.key` file in the same directory you run `ffxc` from. Commands will pick it up automatically.
+
+== Parameter search order and overrides
+
+- Command-line/system properties override `.key` values.
+- Local `.key` overrides project/global defaults.
+- Explicit parameter files declared in `.key` (e.g., `parameters my_smallmol.prm`) augment or override base force-field values.
+
+== Mixed systems (protein + small molecule)
+
+- Use `AMOEBA_BIO_2018` for the biopolymer.
+- Provide small-molecule parameters via `.prm`/`.xml` and include them in `.key` with `parameters <file>`.
+- Check with `ffxc Biotype` and `ffxc Energy` to validate that all atoms are parameterized.
+
+== Reproducibility tips
+
+- Keep a `run.key` under version control with your input structures.
+- Record FFX version and GPU/CPU platform in your logs; keep seeds fixed (e.g., `--randomSeed` for ion placement, and relevant MD seeds when available).

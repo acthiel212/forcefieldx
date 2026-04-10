@@ -1,0 +1,71 @@
+= Constant-pH Molecular Dynamics (CpHMD) with Force Field X (FFX)
+:toc:
+:icons: font
+
+This guide shows how to set up and run constant-pH simulations with FFX using the `Ph*` commands and titration utilities.
+
+== Overview
+
+FFX supports constant-pH energy evaluation and dynamics on titratable sites. Core entry points:
+- `PhEnergy`: evaluate energies for structures with titration states.
+- `PhMinimize`: minimize structures under CpH conditions.
+- `PhDynamics`: run constant-pH molecular dynamics.
+- `test.SaveAsConstantPhPDB`: write PDBs annotated for constant-pH workflows.
+- Utilities: see `TitrationUtils` and related code for protonation models.
+
+See also manpages under `src/site/asciidoc/commands/Ph*.adoc`.
+
+== Preparing structures for CpHMD
+
+1. Start from a reasonable protonation state near your target pH.
+   - Use `Solvator --pH <value>` during solvation to initialize states.
+2. Ensure your `.key` selects an AMOEBA parameter set appropriate for your system (e.g., `AMOEBA_BIO_2018`).
+3. Optionally, write a constant-pH annotated PDB for inspection:
+```
+ffxc test.SaveAsConstantPhPDB input.pdb
+```
+
+== Constant-pH energy and minimization
+
+- Energy at a given pH:
+```
+ffxc PhEnergy --pH 7.0 input.pdb
+```
+- Minimization under CpH conditions:
+```
+ffxc PhMinimize --pH 7.0 --iterations 2000 input.pdb
+```
+
+== Running CpHMD
+
+Basic example at pH 7.0 using OpenMM engine, 100 ps:
+```
+ffxc PhDynamics \
+  --pH 7.0 \
+  --molecularDynamicsEngine OpenMM \
+  --integrator Verlet \
+  --thermostat Bussi \
+  --temperature 298.15 \
+  --dt 1.0 \
+  --numberOfSteps 100000 \
+  --report 0.5 \
+  --write 2.5 \
+  --checkpoint 5.0 \
+  --fileFormat XYZ \
+  input_cph.pdb
+```
+
+Key options:
+- `--titrationModel`, `--titrationInterval`, and related flags control how and how often titration state changes are proposed/accepted.
+- Use `--npt <atm>` with `--isotropic` or `--anisotropic` if pressure control is desired.
+
+== Best practices
+
+- Equilibrate at fixed protonation first (standard `Dynamics`) before enabling CpH.
+- Start with shorter CpH intervals and gradually lengthen once stable.
+- Monitor titration states, pKa estimates, and ensure no persistent numerical instabilities.
+
+== Troubleshooting
+
+- Missing titratable assignments: check for proper residue naming and protonation states; consult `TitrationUtils` and logs.
+- Instability: decrease `--dt`, increase barostat/thermostat coupling times, or restrain highly mobile regions during equilibration.

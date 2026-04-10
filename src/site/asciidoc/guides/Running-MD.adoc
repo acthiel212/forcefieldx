@@ -1,0 +1,99 @@
+= Running Molecular Dynamics (MD) with Force Field X (FFX)
+:toc:
+:icons: font
+
+This guide shows practical MD workflows in FFX using the `Dynamics` command, including thermostats/barostats, file I/O, restarts, and performance tips on CPU/GPU (OpenMM).
+
+== TL;DR Examples
+
+- 100 ps NVT at 298.15 K with 1.0 fs steps, OpenMM engine, XYZ trajectory every 2.5 ps:
+```
+ffxc Dynamics \
+  --molecularDynamicsEngine OpenMM \
+  --integrator Verlet \
+  --thermostat Bussi \
+  --temperature 298.15 \
+  --dt 1.0 \
+  --numberOfSteps 100000 \
+  --report 0.5 \
+  --write 2.5 \
+  --checkpoint 5.0 \
+  --fileFormat XYZ \
+  input_equilibrated.pdb
+```
+
+- 2 ns NPT at 1.0 atm and 298.15 K, isotropic barostat:
+```
+ffxc Dynamics \
+  --molecularDynamicsEngine OpenMM \
+  --integrator Verlet \
+  --thermostat Bussi \
+  --temperature 298.15 \
+  --dt 1.0 \
+  --npt 1.0 \
+  --isotropic \
+  --meanBarostatInterval 25 \
+  --numberOfSteps 2000000 \
+  --report 1.0 \
+  --write 10.0 \
+  --checkpoint 10.0 \
+  --fileFormat XYZ \
+  input_equilibrated.pdb
+```
+
+See `src/site/asciidoc/commands/Dynamics.adoc` for all options.
+
+---
+
+== Key inputs and selections
+
+- Input files: PDB (`.pdb`) or XYZ (`.xyz`). If an adjacent `.dyn` restart exists, `Dynamics` resumes by default.
+- Periodicity: Periodic boundary conditions (PME) are enabled when CRYST1/unit cell is present (write by solvating with `Solvator`).
+- Selections: Use `--active`, `--inactive`, `--select` to limit motion/force evaluations (e.g., restrained solvent, flexible solute). See per-command docs for selection syntax.
+
+== Thermostats and integrators
+
+- Integrators: `--integrator {Verlet|Langevin|Stochastic}`. `Verlet` is a good default.
+- Thermostats: `--thermostat {Berendsen|Bussi|Langevin|Adiabatic}`. For canonical sampling, `Bussi` or `Langevin` are common.
+- Temperature: `--temperature <K>`; switch or ramp between runs for annealing.
+- Time step: `--dt` in femtoseconds. For AMOEBA, 1.0 fs is a conservative default unless otherwise validated.
+
+== Pressure control (NPT)
+
+- Enable NPT with `--npt <pressure_atm>`.
+- Barostat options:
+  - `--isotropic` or `--anisotropic` volume moves.
+  - `--meanBarostatInterval <steps>` frequency of proposing barostat moves.
+  - Optional `--minDensity` and `--maxDensity` bounds to reject extreme densities early in equilibration.
+
+== Trajectory, reporting, and restarts
+
+- Output format: `--fileFormat {XYZ|PDB}`. XYZ writes `.arc` trajectories (compact); PDB is bulkier but widely compatible.
+- Frequencies (ps):
+  - `--report <ps>` prints thermodynamics.
+  - `--write <ps>` writes coordinates to the trajectory.
+  - `--checkpoint <ps>` writes restart files.
+- Restarts: A `.dyn` file triggers continuation. To force a fresh start, remove/rename `.dyn` and related history files.
+
+== Constraints, restraints, and selections
+
+- Harmonic restraints and atom freezing via selection flags can be combined to stabilize equilibration or mimic experiments.
+- Alchemical selections are handled via `--alchemicalAtoms`, `--alchemicalResidues`, `--unchargedAtoms`, etc. See also the Alchemical guide.
+
+== Performance and engines
+
+- Engine: `--molecularDynamicsEngine {OpenMM|FFX}`. `OpenMM` enables GPU acceleration when available.
+- Parallelism: On CPU, FFX engine uses multithreading; on GPU, ensure the chosen device is not oversubscribed.
+- Precision and platform options: See the OpenMM/GPU guide for setting precision, device selection, and platform-specific JVM properties.
+
+== Monitoring and sanity checks
+
+- Check logs for stable temperature, pressure, and density (when NPT).
+- Use `ffxc Energy file.pdb` or `file.arc` snapshots to sanity-check energies.
+- Visualize trajectories with your favorite viewer (VMD, PyMOL) using the `.arc` or PDB trajectory.
+
+== Common pitfalls
+
+- Too-large time steps destabilize AMOEBA; keep `--dt 1.0` fs unless validated otherwise.
+- Missing CRYST1 leads to non-periodic runs; ensure solvation wrote unit cell parameters.
+- Infrequent checkpointing risks data loss on long runs; set `--checkpoint` reasonably.

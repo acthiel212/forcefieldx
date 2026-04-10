@@ -1,0 +1,217 @@
+= End-to-end guide: Preparing a structure for dynamics or free-energy protocols in Force Field X (FFX)
+:toc:
+:icons: font
+
+This walkthrough shows a minimal, reproducible workflow for taking a PDB ID to a production MD simulation (and is directly applicable to alchemical/free‑energy protocols once you have dual/quad topologies). It covers:
+- Downloading a PDB structure
+- Solvating it in a periodic box (optional ions)
+- Energy minimization
+- NVT warm‑up and NPT equilibration
+- Production dynamics
+
+All commands use the `ffxc` CLI that ships with FFX. Run any command with `-h` to see full options.
+
+TIP: Put a `.key` file in your run directory to select the force field and common MD settings. For proteins, AMOEBA Bio 2018 is typical.
+
+Example minimal `run.key`:
+```
+# Choose a force field
+forcefield AMOEBA_BIO_2018
+
+# Nonbonded/cutoff typical defaults are internal to FFX; override here if needed, e.g.:
+# a-ewald 0.545
+# ewald-cutoff 7.0
+# vdw-cutoff 9.0
+# polarization mutual
+```
+
+If you don’t use a `.key`, many defaults still work, but being explicit is good practice for reproducibility.
+
+---
+
+== 1) Download or prepare the starting structure
+
+FFX does not impose a specific PDB downloader, so use `curl`/`wget` from the RCSB PDB (example uses ubiquitin 1UBQ):
+```
+curl -L https://files.rcsb.org/download/1UBQ.pdb -o 1UBQ.pdb
+```
+Notes:
+- Inspect and fix issues like missing residues/loops, alternate locations, non‑standard ligands, and crystallographic waters as appropriate for your study.
+- If you plan constant‑pH or rotamer/titration work, consult the `Ph*` and `MutatePDB`/`SaveAsPDB` docs in `src/site/asciidoc/commands/`.
+
+---
+
+== 2) Solvate the structure in a periodic box (and optionally add ions)
+
+Command reference: `ffxc Solvator -h` (see `src/site/asciidoc/commands/Solvator.adoc`).
+
+You must provide a solvent box PDB (e.g., a water box). The repo ships with examples; a safe default is:
+- `examples/waterbox.pdb` (small equilibrated water box you can tile)
+
+You can also supply an ion PDB (with a matching `.ions` file) to do stoichiometric ion placement.
+
+Examples:
+- Cubic box with 10 Å padding around the solute, translating solute to center:
+```
+ffxc Solvator \
+  --solventFile examples/waterbox.pdb \
+  --padding 10.0 \
+  1UBQ.pdb
+```
+- Rectangular (non‑cubic) box with explicit lengths (Å) (skip auto padding), and place NaCl from an ion file:
+```
+ffxc Solvator \
+  --solventFile examples/waterbox.pdb \
+  --rectangular \
+  --boxLengths 80,70,85 \
+  --ionFile path/to/nacl.pdb \
+  1UBQ.pdb
+```
+Useful options you may tune (see `Solvator -h`):
+- `--padding <Å>`: minimum solvent shell; default 9.0 Å.
+- `--boundary <Å>`: delete solvent closer than this to solute; default 2.5 Å.
+- `--pH <value>`: initialize titration states near this pH (preps for constant‑pH workflows).
+- `--randomSeed <int>`: deterministic ion placement.
+
+Output: a solvated PDB adjacent to your input (e.g., `1UBQ.pdb` → `1UBQ_solvated.pdb` depending on your naming). The output includes periodic box info (CRYST1) so later MD knows it’s periodic.
+
+TIP: If you prefer to keep originals untouched, copy/rename your PDB before solvating and/or direct outputs to a new directory.
+
+---
+
+== 3) Energy minimization (relax bad contacts)
+
+Command reference: `ffxc Minimize -h` (see `src/site/asciidoc/commands/Minimize.adoc`).
+
+Run a short L‑BFGS minimization. Start conservative on steps; increase if needed.
+```
+ffxc Minimize \
+  --iterations 5000 \
+  --eps 1.0 \
+  1UBQ_solvated.pdb
+```
+Notes:
+- You can restrict minimization to a subset of atoms with `--active` selections if needed.
+- For alchemical systems, see the `--ac/--acRes/--lambda` family of options.
+
+Output: an updated (lower‑energy) structure file and a log with final energies.
+
+---
+
+== 4) NVT warm‑up (gentle temperature ramp, optional)
+
+Before applying pressure coupling, it’s common to stabilize temperature under constant volume. Keep time steps small at first for safety.
+
+Example: 50 ps at 298.15 K, 1.0 fs steps, writing frames every 2.5 ps, restarts every 5 ps.
+```
+ffxc Dynamics \
+  --molecularDynamicsEngine OpenMM \
+  --integrator Verlet \
+  --thermostat Bussi \
+  --temperature 298.15 \
+  --dt 1.0 \
+  --numberOfSteps 50000 \
+  --report 0.5 \
+  --write 2.5 \
+  --checkpoint 5.0 \
+  --fileFormat XYZ \
+  1UBQ_solvated_minimized.pdb
+```
+Notes:
+- `--fileFormat XYZ` will write an `.arc` trajectory (compact); use `PDB` if you require PDB output.
+- `--molecularDynamicsEngine OpenMM` leverages GPU acceleration if available. Omit or set to `FFX` for CPU.
+- If a `.dyn` restart file exists next to your input, `Dynamics` will continue from it by default.
+
+---
+
+== 5) NPT equilibration (apply pressure coupling and relax volume)
+
+Use the Monte Carlo barostat built into `Dynamics` via `--npt <pressure_atm>`. A typical equilibration is a few hundred picoseconds to a couple nanoseconds, depending on system size.
+
+Example: 500 ps NPT at 1 atm and 298.15 K.
+```
+ffxc Dynamics \
+  --molecularDynamicsEngine OpenMM \
+  --integrator Verlet \
+  --thermostat Bussi \
+  --temperature 298.15 \
+  --dt 1.0 \
+  --npt 1.0 \
+  --meanBarostatInterval 10 \
+  --isotropic \
+  --numberOfSteps 500000 \
+  --report 0.5 \
+  --write 2.5 \
+  --checkpoint 5.0 \
+  --fileFormat XYZ \
+  1UBQ_solvated_minimized.pdb
+```
+Notes:
+- `--meanBarostatInterval` sets how often barostat moves are proposed (in MD steps).
+- `--isotropic` keeps volume moves isotropic (good default for isotropic liquids).
+- Use `--minDensity`/`--maxDensity` bounds to reject unphysical densities during early equilibration if needed.
+- Keep `dt=1.0 fs` for AMOEBA unless you have validated larger steps for your system.
+
+---
+
+== 6) Production MD (NPT or NVT)
+
+Once density and temperature have stabilized (inspect logs), run your production trajectory. Choose NPT or NVT based on your analysis needs; many workflows keep NPT.
+
+Example: 10 ns NPT production at 298.15 K, 1 atm.
+```
+ffxc Dynamics \
+  --molecularDynamicsEngine OpenMM \
+  --integrator Verlet \
+  --thermostat Bussi \
+  --temperature 298.15 \
+  --dt 1.0 \
+  --npt 1.0 \
+  --meanBarostatInterval 25 \
+  --isotropic \
+  --numberOfSteps 10000000 \
+  --report 1.0 \
+  --write 10.0 \
+  --checkpoint 10.0 \
+  --fileFormat XYZ \
+  1UBQ_equilibrated.pdb
+```
+Tips:
+- Adjust `--report` (thermo print frequency), `--write` (trajectory), and `--checkpoint` (restart) to balance file size vs. resolution.
+- Use different output directories per stage or rename input files to carry stage labels (`*_minimized.pdb`, `*_equilibrated.pdb`).
+- For OpenMM/GPU selection, you can use JVM properties like `-DnumCudaDevices=1` or environment variables depending on your install; see your platform notes.
+
+---
+
+== Notes for free‑energy (alchemical) protocols
+
+Once your structure is equilibrated and validated, you can introduce alchemical topologies and lambdas. Relevant entry points include:
+- `Dynamics` and `Minimize` provide `--alchemicalAtoms`, `--alchemicalResidues`, `--unchargedAtoms`, and dual/quad‑topology options (`--ac2`, `--uaA`, `--uaB`, etc.).
+- Control `--lambda` and switching functions (`--switchingFunction`) during minimization/equilibration windows per lambda state.
+- For OSRW/expanded‑ensemble workflows, see examples under `src/site/xdoc/` and any `Ph*` variants for constant‑pH FE.
+
+General strategy:
+1) Prepare/equilibrate the reference (λ=0 or λ=1) topology as above.
+2) Introduce the alchemical masks/topologies; re‑minimize and briefly re‑equilibrate each λ before production sampling.
+3) Ensure consistent thermostats/barostat and write intervals across λ windows for straightforward analysis.
+
+---
+
+== Common pitfalls and best practices
+
+- Force field: ensure your `.key` selects an appropriate AMOEBA parameter set for your system (proteins: `AMOEBA_BIO_2018`). Mixed systems (protein + small molecule) may require merged or custom parameter files.
+- Protonation/titration: for pH‑dependent studies, initialize with `Solvator --pH` and consider `PhEnergy`, `PhDynamics`, `test.SaveAsConstantPhPDB`, etc.
+- Ions: when using `--ionFile`, you must also have a co‑located `.ions` file with stoichiometry/valences (e.g., `nacl.pdb` and `nacl.ions`). Use `--randomSeed` for reproducibility.
+- Periodicity: solvation writes CRYST1 so MD is periodic; confirm your `Dynamics` logs report PME and periodic boundary conditions.
+- Restart/resume: `Dynamics` writes `.dyn` and history files; rerunning the same command in the same directory will continue by default (verify in logs).
+- Trajectory format: XYZ (`.arc`) is compact for long runs; PDB is bulkier but sometimes preferred for interoperability.
+- Performance: prefer `--molecularDynamicsEngine OpenMM` on GPU; ensure GPU drivers and OpenMM are properly installed per FFX documentation.
+
+---
+
+== Quick reference: core commands used
+
+- `Solvator`: Prepare solvent boxes and ions around a solute. See `src/site/asciidoc/commands/Solvator.adoc`.
+- `Minimize`: L‑BFGS energy minimization. See `src/site/asciidoc/commands/Minimize.adoc`.
+- `Dynamics`: Time integration with thermostats/barostats. See `src/site/asciidoc/commands/Dynamics.adoc`.
+- `Energy`: Compute energies/gradients for spot checks. See `src/site/asciidoc/commands/Energy.adoc`.

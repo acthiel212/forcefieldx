@@ -1,0 +1,84 @@
+= Alchemical Free Energy (AFE) with Force Field X (FFX)
+:toc:
+:icons: font
+
+This guide outlines how to perform alchemical free energy calculations (e.g., relative binding or solvation) in FFX using dual/quad topologies and lambda windows, and how to analyze results.
+
+== Concepts and workflow
+
+- Topologies: FFX supports alchemical selections via atom or residue masks and dual/quad-topology constructs (`--ac2`, `--uaA`, `--uaB`, etc.).
+- Lambda: Continuously or discretely switch interactions using `--lambda` and switching functions.
+- Windows: Sample a set of lambda values (e.g., 0.0 → 1.0) and post-process via `Thermodynamics` (BAR/MBAR/overlap diagnostics).
+
+High-level steps:
+1. Prepare and equilibrate the reference topology at λ=0 or λ=1 (see Preparing-a-Structure guide).
+2. Define alchemical masks/topologies and validate energy evaluation at select λ values.
+3. Minimize and equilibrate briefly at each λ.
+4. Run production MD per λ window, saving trajectories and logs.
+5. Analyze with `Thermodynamics`.
+
+== Defining alchemical systems
+
+Common flags on `Dynamics`/`Minimize` (see command manpages for full details):
+- `--alchemicalAtoms <list>` or `--alchemicalResidues <list>`: select atoms/residues to scale.
+- `--unchargedAtoms <list>`: designate atoms to decouple electrostatics first.
+- Dual/quad topology: `--ac2`, `--uaA`, `--uaB` (check `Dynamics.adoc` and examples).
+- Switching: `--lambda <value>` sets the current λ; `--switchingFunction {SOFTCORE|LINEAR|...}` chooses the schedule.
+
+Example (single λ energy/min):
+```
+ffxc Minimize \
+  --alchemicalResidues 101-150 \
+  --unchargedAtoms 101-150 \
+  --lambda 0.25 \
+  --iterations 2000 \
+  complex_solvated.pdb
+```
+
+== Windowed MD automation
+
+Create a simple bash loop or workflow manager to iterate λ windows (e.g., 0.0, 0.05, 0.1, …, 1.0). Example snippet:
+```
+for L in 0.00 0.05 0.10 0.20 0.35 0.50 0.65 0.80 0.90 0.95 1.00; do 
+  mkdir -p lambda_${L}
+  cd lambda_${L}
+  cp ../complex_equilibrated.pdb .
+  ffxc Minimize --lambda ${L} --iterations 2000 complex_equilibrated.pdb
+  ffxc Dynamics \
+    --molecularDynamicsEngine OpenMM \
+    --integrator Verlet \
+    --thermostat Bussi \
+    --temperature 298.15 \
+    --dt 1.0 \
+    --numberOfSteps 2000000 \
+    --report 1.0 --write 10.0 --checkpoint 10.0 \
+    --lambda ${L} \
+    --fileFormat XYZ \
+    complex_equilibrated.pdb
+  cd ..
+done
+```
+Tune the λ schedule to ensure good overlap between adjacent windows.
+
+== Analysis with Thermodynamics
+
+Use the `Thermodynamics` command to compute free energies from per-window outputs. See `src/site/asciidoc/commands/Thermodynamics.adoc`.
+
+Basic usage:
+```
+ffxc Thermodynamics \
+  --windows lambda_0.00,lambda_0.05,lambda_0.10,lambda_0.20,lambda_0.35,lambda_0.50,lambda_0.65,lambda_0.80,lambda_0.90,lambda_0.95,lambda_1.00 \
+  --method MBAR \
+  --temperature 298.15
+```
+
+Tips:
+- Ensure consistent thermostat/barostat settings across windows.
+- Keep trajectory/reporting/checkpoint frequencies identical for clean analysis.
+- Consider separate decoupling of electrostatics and van der Waals to improve convergence (use `--unchargedAtoms` first, then vdw scaling).
+
+== Best practices
+
+- Validate end states (λ=0 and λ=1) energies and structures.
+- Check overlap matrices/diagnostics from `Thermodynamics` to refine the λ schedule.
+- Run multiple replicas with different random seeds to estimate uncertainty.
