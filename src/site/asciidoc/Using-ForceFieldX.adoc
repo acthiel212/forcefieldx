@@ -10,9 +10,10 @@ Where available, each command name links to its detailed manpage generated from 
 
 FFX commands are run via the `ffxc` launcher (installed with FFX). For example:
 
-```
+[source,shell]
+----
 ffxc Energy protein.pdb
-```
+----
 
 TIP: Most commands accept PDB (`.pdb`) or XYZ (`.xyz`) structure files as input, and many commands support multi‑model ARC files (`.arc`).
 
@@ -53,7 +54,7 @@ The `Potential` package contains utilities for preparing, converting, and evalua
 
 | link:commands/Energy.adoc[Energy]
 | Compute potential energy (and optionally gradients) for structures.
-| `ffxc Energy [-g] [--verbose] file.{pdb|xyz|arc}`
+| `ffxc Energy [-g] [--verbose] file.{pdb\|xyz\|arc}`
 | Supports atom selection, alchemical and topology options; can report Rg and inertia.
 
 | link:commands/ExportQE.adoc[ExportQE]
@@ -153,20 +154,23 @@ Advanced/testing utilities in `ffx.potential.commands.test` include: `Gradient`,
 === Quick examples (Potential)
 
 - Compute energy and gradient for a minimized structure:
-```
+[source,shell]
+----
 ffxc Energy -g minimized.pdb
-```
+----
 
 - Filter an ARC to structures within 1.0 kcal/mol of the minimum and save a new ARC:
-```
+[source,shell]
+----
 ffxc Energy --ec 1.0 trajectory.arc
-```
+----
 
 - Convert a CIF to PDB and wrap into the primary cell:
-```
+[source,shell]
+----
 ffxc ImportCIF structure.cif
 ffxc MoveIntoUnitCell structure.pdb
-```
+----
 
 == Algorithms Commands
 
@@ -298,10 +302,11 @@ Testing/advanced commands under `ffx.algorithms.commands.test` include tools suc
 === Quick examples (Algorithms)
 
 - Minimize, then run a short MD with a Langevin thermostat:
-```
+[source,shell]
+----
 ffxc Minimize input.pdb
 ffxc Dynamics --dt 0.001 --steps 500000 --thermostat Langevin input.pdb
-```
+----
 
 - Torsion scan around a specified dihedral:
 ```
