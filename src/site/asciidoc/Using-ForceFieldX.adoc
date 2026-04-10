@@ -14,12 +14,6 @@ FFX commands are run via the `ffxc` launcher (installed with FFX). For example:
 ffxc Energy protein.pdb
 ```
 
-If `ffxc` is not on your `PATH`, you can run commands via Maven during development:
-
-```
-mvn -q -pl modules/ffx-all -Pcli -Dexec.args="Energy protein.pdb" exec:java
-```
-
 TIP: Most commands accept PDB (`.pdb`) or XYZ (`.xyz`) structure files as input, and many commands support multi‑model ARC files (`.arc`).
 
 == Conventions
