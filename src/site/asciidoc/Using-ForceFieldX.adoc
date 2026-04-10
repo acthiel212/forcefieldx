@@ -4,6 +4,12 @@
 :toclevels: 3
 :icons: font
 
+NOTE: Command/manpage links in this document resolve only after building the documentation site with Maven (e.g., running `mvn site` or the project’s site build). Until then, local links may appear broken.
+
+:toc: macro
+:toclevels: 3
+:icons: font
+
 This guide introduces the Force Field X (FFX) command‑line interface and shows how to use the most common commands.
 It is organized to first cover commands in the `Potential` package, then commands in the `Algorithms` package.
 Where available, each command name links to its detailed manpage generated from the codebase.
@@ -309,9 +315,10 @@ ffxc Dynamics --dt 0.001 --steps 500000 --thermostat Langevin input.pdb
 ----
 
 - Torsion scan around a specified dihedral:
-```
+[source,shell]
+----
 ffxc TorsionScan --atoms 12,15,18,21 molecule.pdb
-```
+----
 
 - BAR/MBAR analysis from work/energies:
 ```
