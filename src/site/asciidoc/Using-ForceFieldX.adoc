@@ -4,7 +4,7 @@
 :toclevels: 3
 :icons: font
 
-NOTE: Command/manpage links in this document resolve only after building the documentation site with Maven (e.g., running `mvn site` or the project’s site build). Until then, local links may appear broken.
+NOTE: Command/manpage links in this document resolve only after building the documentation site with Maven (for example, running mvn site). Until then, local links may appear broken.
 
 :toc: macro
 :toclevels: 3
@@ -321,10 +321,11 @@ ffxc TorsionScan --atoms 12,15,18,21 molecule.pdb
 ----
 
 - BAR/MBAR analysis from work/energies:
-```
+[source,shell]
+----
 ffxc BAR --fwd fwd_work.dat --rev rev_work.dat
 ffxc MBAR --states states.dat --u red_potentials.dat
-```
+----
 
 == Input files and force fields
 

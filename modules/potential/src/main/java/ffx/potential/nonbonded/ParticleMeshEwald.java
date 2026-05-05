@@ -128,11 +128,11 @@ import static org.apache.commons.math3.util.FastMath.sqrt;
  * Darden.<br>
  * @see <br>
  * <a href="http://dx.doi.org/10.1021/ct300035u" target="_blank"> M. J. Schnieders, J.
- * Baltrusaitis, Y. Shi, G. Chattree, L. Zheng, W. Yang and P. Ren, The Structure,
+ * Baltrusaitis, Y. Shi, G. Chattree, L. Zheng, W. Yang, and P. Ren, The Structure,
  * Thermodynamics, and Solubility of Organic Crystals from Simulation with a Polarizable Force
  * Field, Journal of Chemical Theory and Computation 8 (5), 1721-36 (2012)</a>
  * @see <br>
- * <a href="http://dx.doi.org/10.1021/ct100506d" target="_blank"> M. J. Schnieders, T. D. Fenn
+ * <a href="http://dx.doi.org/10.1021/ct100506d" target="_blank"> M. J. Schnieders, T. D. Fenn,
  * and V. S. Pande, Polarizable atomic multipole X-ray refinement: Particle-mesh Ewald
  * electrostatics for macromolecular crystals. Journal of Chemical Theory and Computation 7 (4),
  * 1141-56 (2011)</a>
@@ -401,7 +401,7 @@ public class ParticleMeshEwald implements LambdaInterface {
   private double[] thole;
   private double[] polarizability;
   /**
-   * 1-2, 1-3, 1-4 and 1-5 connectivity lists.
+   * 1-2, 1-3, 1-4, and 1-5 connectivity lists.
    */
   private int[][] mask12;
   private int[][] mask13;
