@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0
+    http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  <properties>
+    <title>OpenMM and GPU Acceleration</title>
+    <author email="michael-schnieders@uiowa.edu">Michael J. Schnieders</author>
+  </properties>
+  <body>
+    <section name="Using OpenMM and GPU Acceleration with Force Field X (FFX)">
+      <p>This guide summarizes how to run FFX MD on GPUs via the OpenMM engine, select devices, and
+        tune precision/performance.
+      </p>
+      <subsection name="Selecting the OpenMM engine">
+        <p>Most MD-capable commands accept
+          <code>--molecularDynamicsEngine {OpenMM|FFX}</code>. Choose <code>OpenMM</code> to utilize
+          GPU acceleration when available:
+        </p>
+        <source>ffxc Dynamics --molecularDynamicsEngine OpenMM input.pdb</source>
+      </subsection>
+      <subsection name="Device selection">
+        <p>Device selection depends on your platform and installation. Common approaches:</p>
+        <ul>
+          <li>Set environment variables before launching <code>ffxc</code> (examples):
+            <ul>
+              <li>CUDA: <code>CUDA_VISIBLE_DEVICES=0</code> selects GPU 0.</li>
+              <li>OpenCL: <code>OPENCL_PLATFORM_INDEX=0</code> and
+                <code>OPENCL_DEVICE_INDEX=0</code>.
+              </li>
+            </ul>
+          </li>
+          <li>JVM system properties recognized by the FFX/OpenMM binding may include:
+            <ul>
+              <li><code>-DnumCudaDevices=1</code> (limit visible CUDA devices)</li>
+              <li><code>-Dopenmm.platform=CUDA</code> or <code>-Dopenmm.platform=OpenCL</code>
+                (prefer a platform)
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <p>Example with Maven launcher and a preferred platform:</p>
+        <source>mvn -q -pl modules/ffx-all -Pcli \
+  -Dexec.args="Dynamics --molecularDynamicsEngine OpenMM input.pdb" \
+  -Dopenmm.platform=CUDA \
+  exec:java</source>
+      </subsection>
+      <subsection name="Precision modes">
+        <p>OpenMM supports multiple precision modes that trade speed for accuracy:</p>
+        <ul>
+          <li>Single (fastest), Mixed (good default), Double (slowest, highest precision).</li>
+        </ul>
+        <p>Select via environment variable or property depending on your install. Examples:</p>
+        <ul>
+          <li><code>OPENMM_DEFAULT_PRECISION=mixed</code></li>
+          <li><code>-Dopenmm.precision=mixed</code></li>
+        </ul>
+        <p>Check FFX/OpenMM logs to confirm the selected platform and precision at startup.</p>
+      </subsection>
+      <subsection name="Performance tips">
+        <ul>
+          <li>Keep time step conservative for AMOEBA (e.g., <code>--dt 1.0</code> fs) unless
+            validated.
+          </li>
+          <li>Minimize CPU–GPU data transfers: avoid overly frequent <code>--write</code> and
+            <code>--report</code>.
+          </li>
+          <li>Ensure the GPU is not oversubscribed by other processes; monitor with
+            <code>nvidia-smi</code>.
+          </li>
+          <li>Pin CPU threads appropriately; on shared nodes, reserve sufficient CPU cores.</li>
+        </ul>
+      </subsection>
+      <subsection name="Troubleshooting">
+        <ul>
+          <li>OpenMM not found: Verify your installation and library paths (e.g.,
+            <code>LD_LIBRARY_PATH</code>) include OpenMM; ensure versions are compatible with
+            FFX.
+          </li>
+          <li>Wrong device/platform: Explicitly set <code>CUDA_VISIBLE_DEVICES</code> or
+            <code>-Dopenmm.platform</code>.
+          </li>
+          <li>Crashes under high load: Reduce <code>--dt</code>, use Mixed precision, update GPU
+            drivers.
+          </li>
+        </ul>
+      </subsection>
+    </section>
+  </body>
+</document>

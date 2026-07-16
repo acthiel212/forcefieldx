@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0
+    http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  <properties>
+    <title>Running Molecular Dynamics</title>
+    <author email="michael-schnieders@uiowa.edu">Michael J. Schnieders</author>
+  </properties>
+  <body>
+    <section name="Running Molecular Dynamics (MD) with Force Field X (FFX)">
+      <p>This guide shows practical MD workflows in FFX using the <code>Dynamics</code> command,
+        including thermostats/barostats, file I/O, restarts, and performance tips on CPU/GPU
+        (OpenMM).
+      </p>
+      <subsection name="TL;DR Examples">
+        <p>100 ps NVT at 298.15 K with 1.0 fs steps, OpenMM engine, XYZ trajectory every 2.5
+          ps:
+        </p>
+        <source>ffxc Dynamics \
+  --molecularDynamicsEngine OpenMM \
+  --integrator Verlet \
+  --thermostat Bussi \
+  --temperature 298.15 \
+  --dt 1.0 \
+  --numberOfSteps 100000 \
+  --report 0.5 \
+  --write 2.5 \
+  --checkpoint 5.0 \
+  --fileFormat XYZ \
+  input_equilibrated.pdb</source>
+        <p>2 ns NPT at 1.0 atm and 298.15 K, isotropic barostat:</p>
+        <source>ffxc Dynamics \
+  --molecularDynamicsEngine OpenMM \
+  --integrator Verlet \
+  --thermostat Bussi \
+  --temperature 298.15 \
+  --dt 1.0 \
+  --npt 1.0 \
+  --isotropic \
+  --meanBarostatInterval 25 \
+  --numberOfSteps 2000000 \
+  --report 1.0 \
+  --write 10.0 \
+  --checkpoint 10.0 \
+  --fileFormat XYZ \
+  input_equilibrated.pdb</source>
+        <p>See the <a href="../commands/Dynamics.html">Dynamics</a> command for all options.</p>
+      </subsection>
+      <subsection name="Key inputs and selections">
+        <ul>
+          <li>Input files: PDB (<code>.pdb</code>) or XYZ (<code>.xyz</code>). If an adjacent
+            <code>.dyn</code> restart exists, <code>Dynamics</code> resumes by default.
+          </li>
+          <li>Periodicity: Periodic boundary conditions (PME) are enabled when CRYST1/unit cell is
+            present (write by solvating with <code>Solvator</code>).
+          </li>
+          <li>Selections: Use <code>--active</code>, <code>--inactive</code>, <code>--select</code>
+            to limit motion/force evaluations (e.g., restrained solvent, flexible solute). See
+            per-command docs for selection syntax.
+          </li>
+        </ul>
+      </subsection>
+      <subsection name="Thermostats and integrators">
+        <ul>
+          <li>Integrators: <code>--integrator {Verlet|Langevin|Stochastic}</code>.
+            <code>Verlet</code> is a good default.
+          </li>
+          <li>Thermostats: <code>--thermostat {Berendsen|Bussi|Langevin|Adiabatic}</code>. For
+            canonical sampling, <code>Bussi</code> or <code>Langevin</code> are common.
+          </li>
+          <li>Temperature: <code>--temperature &lt;K&gt;</code>; switch or ramp between runs for
+            annealing.
+          </li>
+          <li>Time step: <code>--dt</code> in femtoseconds. For AMOEBA, 1.0 fs is a conservative
+            default unless otherwise validated.
+          </li>
+        </ul>
+      </subsection>
+      <subsection name="Pressure control (NPT)">
+        <ul>
+          <li>Enable NPT with <code>--npt &lt;pressure_atm&gt;</code>.</li>
+          <li>Barostat options:
+            <ul>
+              <li><code>--isotropic</code> or <code>--anisotropic</code> volume moves.</li>
+              <li><code>--meanBarostatInterval &lt;steps&gt;</code> frequency of proposing
+                barostat moves.
+              </li>
+              <li>Optional <code>--minDensity</code> and <code>--maxDensity</code> bounds to reject
+                extreme densities early in equilibration.
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </subsection>
+      <subsection name="Trajectory, reporting, and restarts">
+        <ul>
+          <li>Output format: <code>--fileFormat {XYZ|PDB}</code>. XYZ writes <code>.arc</code>
+            trajectories (compact); PDB is bulkier but widely compatible.
+          </li>
+          <li>Frequencies (ps):
+            <ul>
+              <li><code>--report &lt;ps&gt;</code> prints thermodynamics.</li>
+              <li><code>--write &lt;ps&gt;</code> writes coordinates to the trajectory.</li>
+              <li><code>--checkpoint &lt;ps&gt;</code> writes restart files.</li>
+            </ul>
+          </li>
+          <li>Restarts: A <code>.dyn</code> file triggers continuation. To force a fresh start,
+            remove/rename <code>.dyn</code> and related history files.
+          </li>
+        </ul>
+      </subsection>
+      <subsection name="Constraints, restraints, and selections">
+        <ul>
+          <li>Harmonic restraints and atom freezing via selection flags can be combined to
+            stabilize equilibration or mimic experiments.
+          </li>
+          <li>Alchemical selections are handled via <code>--alchemicalAtoms</code>,
+            <code>--alchemicalResidues</code>, <code>--unchargedAtoms</code>, etc. See also the
+            Alchemical guide.
+          </li>
+        </ul>
+      </subsection>
+      <subsection name="Performance and engines">
+        <ul>
+          <li>Engine: <code>--molecularDynamicsEngine {OpenMM|FFX}</code>. <code>OpenMM</code>
+            enables GPU acceleration when available.
+          </li>
+          <li>Parallelism: On CPU, FFX engine uses multithreading; on GPU, ensure the chosen device
+            is not oversubscribed.
+          </li>
+          <li>Precision and platform options: See the OpenMM/GPU guide for setting precision,
+            device selection, and platform-specific JVM properties.
+          </li>
+        </ul>
+      </subsection>
+      <subsection name="Monitoring and sanity checks">
+        <ul>
+          <li>Check logs for stable temperature, pressure, and density (when NPT).</li>
+          <li>Use <code>ffxc Energy file.pdb</code> or <code>file.arc</code> snapshots to
+            sanity-check energies.
+          </li>
+          <li>Visualize trajectories with your favorite viewer (VMD, PyMOL) using the
+            <code>.arc</code> or PDB trajectory.
+          </li>
+        </ul>
+      </subsection>
+      <subsection name="Common pitfalls">
+        <ul>
+          <li>Too-large time steps destabilize AMOEBA; keep <code>--dt 1.0</code> fs unless
+            validated otherwise.
+          </li>
+          <li>Missing CRYST1 leads to non-periodic runs; ensure solvation wrote unit cell
+            parameters.
+          </li>
+          <li>Infrequent checkpointing risks data loss on long runs; set <code>--checkpoint</code>
+            reasonably.
+          </li>
+        </ul>
+      </subsection>
+    </section>
+  </body>
+</document>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0
+    http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  <properties>
+    <title>Key Files and Force Fields</title>
+    <author email="michael-schnieders@uiowa.edu">Michael J. Schnieders</author>
+  </properties>
+  <body>
+    <section name="Key Files and Force Field Selection in Force Field X (FFX)">
+      <p>This guide explains how FFX finds parameters, how to choose a force field, and how to use
+        <code>.key</code> files to control simulations reproducibly.
+      </p>
+      <subsection name="Force field parameter sets">
+        <p>FFX ships with AMOEBA parameter sets. Common choices:</p>
+        <ul>
+          <li>AMOEBA_BIO_2018: Protein/nucleic-acid focused biomolecular parameters.</li>
+          <li>Other AMOEBA variants may be available for small molecules, water, ions.</li>
+        </ul>
+        <p>Ways to select parameters:</p>
+        <ul>
+          <li>In a <code>.key</code> file in your working directory:
+            <source>forcefield AMOEBA_BIO_2018</source>
+          </li>
+          <li>Or via JVM property when launching <code>ffxc</code> with Maven:
+            <code>-Dforcefield=AMOEBA_BIO_2018</code>.
+          </li>
+        </ul>
+        <p>FFX also reads parameter files listed by <code>parameters</code> lines in
+          <code>.key</code>, or provided as XML/PRM files alongside structures.
+        </p>
+      </subsection>
+      <subsection name="What is a .key file?">
+        <p>A plain-text file named <code>something.key</code> in your run directory that sets
+          defaults for all FFX commands. Typical entries:
+        </p>
+        <source># Select force field
+forcefield AMOEBA_BIO_2018
+
+# PME and cutoffs (override defaults if needed)
+# a-ewald 0.545
+# ewald-cutoff 7.0
+# vdw-cutoff 9.0
+# polarization mutual
+
+# Constraints/restraints examples (selection syntax in command docs)
+# restrain-distance 12 45 2.0 100.0
+# freeze atom 1-100</source>
+        <p>Place the <code>.key</code> file in the same directory you run <code>ffxc</code> from.
+          Commands will pick it up automatically.
+        </p>
+      </subsection>
+      <subsection name="Parameter search order and overrides">
+        <ul>
+          <li>Command-line/system properties override <code>.key</code> values.</li>
+          <li>Local <code>.key</code> overrides project/global defaults.</li>
+          <li>Explicit parameter files declared in <code>.key</code> (e.g.,
+            <code>parameters my_smallmol.prm</code>) augment or override base force-field
+            values.
+          </li>
+        </ul>
+      </subsection>
+      <subsection name="Mixed systems (protein + small molecule)">
+        <ul>
+          <li>Use <code>AMOEBA_BIO_2018</code> for the biopolymer.</li>
+          <li>Provide small-molecule parameters via <code>.prm</code>/<code>.xml</code> and include
+            them in <code>.key</code> with <code>parameters &lt;file&gt;</code>.
+          </li>
+          <li>Check with <code>ffxc Biotype</code> and <code>ffxc Energy</code> to validate that all
+            atoms are parameterized.
+          </li>
+        </ul>
+      </subsection>
+      <subsection name="Reproducibility tips">
+        <ul>
+          <li>Keep a <code>run.key</code> under version control with your input structures.</li>
+          <li>Record FFX version and GPU/CPU platform in your logs; keep seeds fixed (e.g.,
+            <code>--randomSeed</code> for ion placement, and relevant MD seeds when available).
+          </li>
+        </ul>
+      </subsection>
+    </section>
+  </body>
+</document>

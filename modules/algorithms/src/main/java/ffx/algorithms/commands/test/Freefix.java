@@ -51,6 +51,12 @@ import static java.lang.Math.exp;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 import static java.lang.String.format;
+/*
+D. Hamelberg and J. A. McCammon, "Standard Free Energy of
+Releasing a Localized Water Molecule from the Binding Pockets
+of Proteins: Double-Decoupling Method", Journal of the American
+Chemical Society, 126, 7683-7689 (2004)  [equations 15-19]
+ */
 
 /**
  * The Freefix script calculates analytical free energy, entropy, and enthalpy corrections

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0
+    http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  <properties>
+    <title>Troubleshooting and Reproducibility</title>
+    <author email="michael-schnieders@uiowa.edu">Michael J. Schnieders</author>
+  </properties>
+  <body>
+    <section name="Troubleshooting and Reproducibility in Force Field X (FFX)">
+      <p>This guide collects common pitfalls, error patterns, and practical steps to make
+        simulations robust and reproducible.
+      </p>
+      <subsection name="Common issues and fixes">
+        <p><b>Missing parameters / unassigned biotypes</b></p>
+        <ul>
+          <li>Symptom: <code>Energy</code> or <code>Dynamics</code> fails with messages about
+            missing atom types or parameters.
+          </li>
+          <li>Fixes:
+            <ul>
+              <li>Run <code>ffxc Biotype file.pdb</code> to inspect biotype/atom-class
+                assignments.
+              </li>
+              <li>Ensure your <code>.key</code> selects a suitable force field, e.g.,
+                <code>forcefield AMOEBA_BIO_2018</code>.
+              </li>
+              <li>Add small-molecule parameter files via <code>parameters my_ligand.prm</code> in
+                <code>.key</code>.
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <p><b>Non-periodic vs periodic confusion</b></p>
+        <ul>
+          <li>Symptom: PME not enabled, density meaningless, or infinite system growth.</li>
+          <li>Fixes:
+            <ul>
+              <li>Ensure the input PDB includes <code>CRYST1</code> records (produced by
+                <code>Solvator</code>).
+              </li>
+              <li>Confirm logs report periodic boundaries and PME grid initialization.</li>
+            </ul>
+          </li>
+        </ul>
+        <p><b>Instabilities at start of MD</b></p>
+        <ul>
+          <li>Symptom: Temperature/energy blow-ups in early steps.</li>
+          <li>Fixes:
+            <ul>
+              <li>Minimize first (<code>ffxc Minimize</code>).</li>
+              <li>Start with NVT and a small time step (e.g., <code>--dt 1.0</code> fs) before
+                enabling NPT.
+              </li>
+              <li>Apply gentle restraints during early equilibration; reduce
+                <code>--report</code>/<code>--write</code> frequencies to limit I/O overhead.
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <p><b>Ion placement and neutrality</b></p>
+        <ul>
+          <li>Symptom: Unexpected charge or bad initial ion contacts.</li>
+          <li>Fixes:
+            <ul>
+              <li>Provide both <code>.pdb</code> and matching <code>.ions</code> files to
+                <code>Solvator --ionFile</code>.
+              </li>
+              <li>Use <code>--boundary</code> and <code>--randomSeed</code> to control placement
+                and reproducibility.
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <p><b>Restart/resume behavior</b></p>
+        <ul>
+          <li>Symptom: A run unexpectedly continues from a previous state or fails to restart.</li>
+          <li>Fixes:
+            <ul>
+              <li>Remove or rename <code>.dyn</code> and history files to force a fresh start.</li>
+              <li>Set and verify <code>--checkpoint</code> frequency; inspect logs for restart file
+                writes.
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <p><b>OpenMM GPU selection/precision</b></p>
+        <ul>
+          <li>Symptom: Wrong GPU, performance issues, or crashes.</li>
+          <li>Fixes:
+            <ul>
+              <li>Set <code>CUDA_VISIBLE_DEVICES</code> or <code>-Dopenmm.platform=CUDA</code> and
+                confirm in logs.
+              </li>
+              <li>Choose Mixed precision (see OpenMM/GPU guide) and keep <code>--dt</code>
+                conservative.
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </subsection>
+      <subsection name="Reproducibility checklist">
+        <ul>
+          <li>Inputs under version control: structures (<code>.pdb</code>/<code>.xyz</code>),
+            <code>.key</code>, custom parameters (<code>.prm</code>/<code>.xml</code>).
+          </li>
+          <li>Record software environment: FFX version, Java version, OpenMM version, GPU
+            driver.
+          </li>
+          <li>Fixed seeds where applicable: <code>--randomSeed</code> (ions), MD/random components
+            if available.
+          </li>
+          <li>Consistent settings across windows (AFE): thermostats/barostat,
+            <code>--report</code>, <code>--write</code>, <code>--checkpoint</code>.
+          </li>
+          <li>Archive logs and trajectory metadata; prefer text-based logs for long-term
+            storage.
+          </li>
+        </ul>
+      </subsection>
+      <subsection name="Diagnostic commands">
+        <ul>
+          <li><code>ffxc Energy file.{pdb|xyz|arc}</code>: quick energy/gradient checks and sanity
+            tests on snapshots.
+          </li>
+          <li><code>ffxc Density file.arc</code>: check and filter by density.</li>
+          <li><code>ffxc Timer</code>: micro-benchmarks to compare platforms and parameter
+            tweaks.
+          </li>
+        </ul>
+      </subsection>
+    </section>
+  </body>
+</document>

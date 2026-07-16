@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0
+    http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  <properties>
+    <title>Constant-pH Molecular Dynamics</title>
+    <author email="michael-schnieders@uiowa.edu">Michael J. Schnieders</author>
+  </properties>
+  <body>
+    <section name="Constant-pH Molecular Dynamics (CpHMD) with Force Field X (FFX)">
+      <p>This guide shows how to set up and run constant-pH simulations with FFX using the
+        <code>Ph*</code> commands and titration utilities.
+      </p>
+      <subsection name="Overview">
+        <p>FFX supports constant-pH energy evaluation and dynamics on titratable sites. Core entry
+          points:
+        </p>
+        <ul>
+          <li><code>PhEnergy</code>: evaluate energies for structures with titration states.</li>
+          <li><code>PhMinimize</code>: minimize structures under CpH conditions.</li>
+          <li><code>PhDynamics</code>: run constant-pH molecular dynamics.</li>
+          <li><code>test.SaveAsConstantPhPDB</code>: write PDBs annotated for constant-pH
+            workflows.
+          </li>
+          <li>Utilities: see <code>TitrationUtils</code> and related code for protonation
+            models.
+          </li>
+        </ul>
+        <p>See also the <code>Ph*</code> commands in the User Manual.</p>
+      </subsection>
+      <subsection name="Preparing structures for CpHMD">
+        <ol>
+          <li>Start from a reasonable protonation state near your target pH.
+            <ul>
+              <li>Use <code>Solvator --pH &lt;value&gt;</code> during solvation to initialize
+                states.
+              </li>
+            </ul>
+          </li>
+          <li>Ensure your <code>.key</code> selects an AMOEBA parameter set appropriate for your
+            system (e.g., <code>AMOEBA_BIO_2018</code>).
+          </li>
+          <li>Optionally, write a constant-pH annotated PDB for inspection:</li>
+        </ol>
+        <source>ffxc test.SaveAsConstantPhPDB input.pdb</source>
+      </subsection>
+      <subsection name="Constant-pH energy and minimization">
+        <p>Energy at a given pH:</p>
+        <source>ffxc PhEnergy --pH 7.0 input.pdb</source>
+        <p>Minimization under CpH conditions:</p>
+        <source>ffxc PhMinimize --pH 7.0 --iterations 2000 input.pdb</source>
+      </subsection>
+      <subsection name="Running CpHMD">
+        <p>Basic example at pH 7.0 using OpenMM engine, 100 ps:</p>
+        <source>ffxc PhDynamics \
+  --pH 7.0 \
+  --molecularDynamicsEngine OpenMM \
+  --integrator Verlet \
+  --thermostat Bussi \
+  --temperature 298.15 \
+  --dt 1.0 \
+  --numberOfSteps 100000 \
+  --report 0.5 \
+  --write 2.5 \
+  --checkpoint 5.0 \
+  --fileFormat XYZ \
+  input_cph.pdb</source>
+        <p>Key options:</p>
+        <ul>
+          <li><code>--titrationModel</code>, <code>--titrationInterval</code>, and related flags
+            control how and how often titration state changes are proposed/accepted.
+          </li>
+          <li>Use <code>--npt &lt;atm&gt;</code> with <code>--isotropic</code> or
+            <code>--anisotropic</code> if pressure control is desired.
+          </li>
+        </ul>
+      </subsection>
+      <subsection name="Best practices">
+        <ul>
+          <li>Equilibrate at fixed protonation first (standard <code>Dynamics</code>) before
+            enabling CpH.
+          </li>
+          <li>Start with shorter CpH intervals and gradually lengthen once stable.</li>
+          <li>Monitor titration states, pKa estimates, and ensure no persistent numerical
+            instabilities.
+          </li>
+        </ul>
+      </subsection>
+      <subsection name="Troubleshooting">
+        <ul>
+          <li>Missing titratable assignments: check for proper residue naming and protonation
+            states; consult <code>TitrationUtils</code> and logs.
+          </li>
+          <li>Instability: decrease <code>--dt</code>, increase barostat/thermostat coupling
+            times, or restrain highly mobile regions during equilibration.
+          </li>
+        </ul>
+      </subsection>
+    </section>
+  </body>
+</document>

@@ -344,15 +344,25 @@ ffxc MBAR --states states.dat --u red_potentials.dat
 - CLI help: add `-h` or `--help` to any command, e.g., `ffxc Energy --help`.
 - Listing commands: run the GUI, or in code, see `ffx.utilities.FFXCommand` which enumerates available commands.
 
-== Guides (task-oriented tutorials)
+== Guides (task-oriented tutorials and worked examples)
 
-- link:guides/Preparing-a-Structure.adoc[Preparing a Structure]: End-to-end prep from PDB → solvation → minimization → NVT/NPT → production.
-- link:guides/Running-MD.adoc[Running MD]: Practical `Dynamics` usage, thermostats/barostats, I/O, restarts, and performance tips.
-- link:guides/Key-Files-and-Force-Fields.adoc[Key Files and Force Fields]: How `.key` files work, selecting AMOEBA parameter sets, mixing parameters.
-- link:guides/Constant-pH-MD.adoc[Constant-pH MD]: Setup and run `PhEnergy`/`PhMinimize`/`PhDynamics`, titration models.
-- link:guides/Alchemical-Free-Energy.adoc[Alchemical Free Energy]: Dual/quad topologies, lambda schedules, and analysis with `Thermodynamics`.
-- link:guides/OpenMM-GPU-Acceleration.adoc[OpenMM/GPU Acceleration]: Selecting devices, platforms, and precision; tuning performance.
-- link:guides/Troubleshooting-and-Reproducibility.adoc[Troubleshooting & Reproducibility]: Common issues, diagnostics, and reproducible workflows.
+Task-oriented tutorials:
+
+- link:guides/Preparing-a-Structure.html[Preparing a Structure]: End-to-end prep from PDB → solvation → minimization → NVT/NPT → production.
+- link:guides/Running-MD.html[Running MD]: Practical `Dynamics` usage, thermostats/barostats, I/O, restarts, and performance tips.
+- link:guides/Constant-pH-MD.html[Constant-pH MD]: Setup and run `PhEnergy`/`PhMinimize`/`PhDynamics`, titration models.
+- link:guides/Troubleshooting-and-Reproducibility.html[Troubleshooting & Reproducibility]: Common issues, diagnostics, and reproducible workflows.
+
+Worked examples:
+
+- link:guides/input.html[Input Files for FFX]: Input files and force field selection for FFX calculations.
+- link:guides/convertFileFormat.html[Convert File Format]: Conversion between CIF, PDB, and XYZ formats.
+- link:guides/gpuSideChain.html[GPU Accelerated Side-Chain Optimization]: GPU accelerated many-body side-chain optimization.
+- link:guides/dee.html[Many-Body DEE]: Side-chain optimization and mutation via Many-Body DEE.
+- link:guides/gauche.html[Organic Crystal Thermodynamics]: Absolute organic crystal thermodynamic stability.
+- link:guides/polymorphNPTsearch.html[Thermodynamic Polymorph Search]: Thermodynamic NPT organic crystal polymorph search.
+- link:guides/mcOSRWSolvationFreeEnergy.html[MC-OST Solvation Free Energy]: GPU accelerated MC-OST solvation free energy.
+- link:guides/xray.html[AMOEBA-assisted X-ray Refinement]: X-ray refinement at high and low resolution.
 
 == Reproducibility tips
 

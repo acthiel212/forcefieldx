@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0
+    http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  <properties>
+    <title>Alchemical Free Energy</title>
+    <author email="michael-schnieders@uiowa.edu">Michael J. Schnieders</author>
+  </properties>
+  <body>
+    <section name="Alchemical Free Energy (AFE) with Force Field X (FFX)">
+      <p>This guide outlines how to perform alchemical free energy calculations (e.g., relative
+        binding or solvation) in FFX using dual/quad topologies and lambda windows, and how to
+        analyze results.
+      </p>
+      <subsection name="Concepts and workflow">
+        <ul>
+          <li>Topologies: FFX supports alchemical selections via atom or residue masks and
+            dual/quad-topology constructs (<code>--ac2</code>, <code>--uaA</code>,
+            <code>--uaB</code>, etc.).
+          </li>
+          <li>Lambda: Continuously or discretely switch interactions using <code>--lambda</code>
+            and switching functions.
+          </li>
+          <li>Windows: Sample a set of lambda values (e.g., 0.0 → 1.0) and post-process via
+            <code>Thermodynamics</code> (BAR/MBAR/overlap diagnostics).
+          </li>
+        </ul>
+        <p>High-level steps:</p>
+        <ol>
+          <li>Prepare and equilibrate the reference topology at λ=0 or λ=1 (see the
+            <a href="../guides/Preparing-a-Structure.html">Preparing a Structure</a> guide).
+          </li>
+          <li>Define alchemical masks/topologies and validate energy evaluation at select λ
+            values.
+          </li>
+          <li>Minimize and equilibrate briefly at each λ.</li>
+          <li>Run production MD per λ window, saving trajectories and logs.</li>
+          <li>Analyze with <code>Thermodynamics</code>.</li>
+        </ol>
+      </subsection>
+      <subsection name="Defining alchemical systems">
+        <p>Common flags on <code>Dynamics</code>/<code>Minimize</code> (see command manpages for
+          full details):
+        </p>
+        <ul>
+          <li><code>--alchemicalAtoms &lt;list&gt;</code> or
+            <code>--alchemicalResidues &lt;list&gt;</code>: select atoms/residues to scale.
+          </li>
+          <li><code>--unchargedAtoms &lt;list&gt;</code>: designate atoms to decouple
+            electrostatics first.
+          </li>
+          <li>Dual/quad topology: <code>--ac2</code>, <code>--uaA</code>, <code>--uaB</code>
+            (check the <a href="../commands/Dynamics.html">Dynamics</a> command and examples).
+          </li>
+          <li>Switching: <code>--lambda &lt;value&gt;</code> sets the current λ;
+            <code>--switchingFunction {SOFTCORE|LINEAR|...}</code> chooses the schedule.
+          </li>
+        </ul>
+        <p>Example (single λ energy/min):</p>
+        <source>ffxc Minimize \
+  --alchemicalResidues 101-150 \
+  --unchargedAtoms 101-150 \
+  --lambda 0.25 \
+  --iterations 2000 \
+  complex_solvated.pdb</source>
+      </subsection>
+      <subsection name="Windowed MD automation">
+        <p>Create a simple bash loop or workflow manager to iterate λ windows (e.g., 0.0, 0.05,
+          0.1, …, 1.0). Example snippet:
+        </p>
+        <source>for L in 0.00 0.05 0.10 0.20 0.35 0.50 0.65 0.80 0.90 0.95 1.00; do
+  mkdir -p lambda_${L}
+  cd lambda_${L}
+  cp ../complex_equilibrated.pdb .
+  ffxc Minimize --lambda ${L} --iterations 2000 complex_equilibrated.pdb
+  ffxc Dynamics \
+    --molecularDynamicsEngine OpenMM \
+    --integrator Verlet \
+    --thermostat Bussi \
+    --temperature 298.15 \
+    --dt 1.0 \
+    --numberOfSteps 2000000 \
+    --report 1.0 --write 10.0 --checkpoint 10.0 \
+    --lambda ${L} \
+    --fileFormat XYZ \
+    complex_equilibrated.pdb
+  cd ..
+done</source>
+        <p>Tune the λ schedule to ensure good overlap between adjacent windows.</p>
+      </subsection>
+      <subsection name="Analysis with Thermodynamics">
+        <p>Use the <code>Thermodynamics</code> command to compute free energies from per-window
+          outputs. See the <a href="../commands/Thermodynamics.html">Thermodynamics</a> command.
+        </p>
+        <p>Basic usage:</p>
+        <source>ffxc Thermodynamics \
+  --windows lambda_0.00,lambda_0.05,lambda_0.10,lambda_0.20,lambda_0.35,lambda_0.50,lambda_0.65,lambda_0.80,lambda_0.90,lambda_0.95,lambda_1.00 \
+  --method MBAR \
+  --temperature 298.15</source>
+        <p>Tips:</p>
+        <ul>
+          <li>Ensure consistent thermostat/barostat settings across windows.</li>
+          <li>Keep trajectory/reporting/checkpoint frequencies identical for clean analysis.</li>
+          <li>Consider separate decoupling of electrostatics and van der Waals to improve
+            convergence (use <code>--unchargedAtoms</code> first, then vdw scaling).
+          </li>
+        </ul>
+      </subsection>
+      <subsection name="Best practices">
+        <ul>
+          <li>Validate end states (λ=0 and λ=1) energies and structures.</li>
+          <li>Check overlap matrices/diagnostics from <code>Thermodynamics</code> to refine the λ
+            schedule.
+          </li>
+          <li>Run multiple replicas with different random seeds to estimate uncertainty.</li>
+        </ul>
+      </subsection>
+    </section>
+  </body>
+</document>
