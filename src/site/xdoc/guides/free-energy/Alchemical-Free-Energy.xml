@@ -28,7 +28,7 @@
         <p>High-level steps:</p>
         <ol>
           <li>Prepare and equilibrate the reference topology at λ=0 or λ=1 (see the
-            <a href="../guides/Preparing-a-Structure.html">Preparing a Structure</a> guide).
+            <a href="../getting-started/Preparing-a-Structure.html">Preparing a Structure</a> guide).
           </li>
           <li>Define alchemical masks/topologies and validate energy evaluation at select λ
             values.
@@ -50,7 +50,7 @@
             electrostatics first.
           </li>
           <li>Dual/quad topology: <code>--ac2</code>, <code>--uaA</code>, <code>--uaB</code>
-            (check the <a href="../commands/Dynamics.html">Dynamics</a> command and examples).
+            (check the <a href="../../commands/Dynamics.html">Dynamics</a> command and examples).
           </li>
           <li>Switching: <code>--lambda &lt;value&gt;</code> sets the current λ;
             <code>--switchingFunction {SOFTCORE|LINEAR|...}</code> chooses the schedule.
@@ -90,7 +90,7 @@ done</source>
       </subsection>
       <subsection name="Analysis with Thermodynamics">
         <p>Use the <code>Thermodynamics</code> command to compute free energies from per-window
-          outputs. See the <a href="../commands/Thermodynamics.html">Thermodynamics</a> command.
+          outputs. See the <a href="../../commands/Thermodynamics.html">Thermodynamics</a> command.
         </p>
         <p>Basic usage:</p>
         <source>ffxc Thermodynamics \

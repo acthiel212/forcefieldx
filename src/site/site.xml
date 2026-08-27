@@ -197,22 +197,22 @@
         <item name="Van Der Waals Functional Form" href="/properties/VanDerWaalsFunctionalForm.html"/>
         <item name="Structural Refinement" href="/properties/StructuralRefinement.html"/>
       </item>
-      <item name="Guides" href="/guides/Preparing-a-Structure.html" collapse="true">
-        <item name="Preparing a Structure" href="/guides/Preparing-a-Structure.html"/>
-        <item name="Key Files and Force Fields" href="/guides/Key-Files-and-Force-Fields.html"/>
-        <item name="Input Files for FFX" href="/guides/input.html"/>
-        <item name="Convert File Format" href="/guides/convertFileFormat.html"/>
-        <item name="Running Molecular Dynamics" href="/guides/Running-MD.html"/>
-        <item name="Constant-pH Molecular Dynamics" href="/guides/Constant-pH-MD.html"/>
-        <item name="Alchemical Free Energy" href="/guides/Alchemical-Free-Energy.html"/>
-        <item name="OpenMM and GPU Acceleration" href="/guides/OpenMM-GPU-Acceleration.html"/>
-        <item name="GPU Accelerated Side-Chain Optimization" href="/guides/gpuSideChain.html"/>
-        <item name="Side-Chain Optimization and Mutation via Many-Body DEE" href="/guides/dee.html"/>
-        <item name="Organic Crystal Thermodynamics" href="/guides/gauche.html"/>
-        <item name="Thermodynamic Polymorph Search" href="/guides/polymorphNPTsearch.html"/>
-        <item name="GPU Accelerated MC-OST Solvation Free Energy" href="/guides/mcOSRWSolvationFreeEnergy.html"/>
-        <item name="AMOEBA-assisted X-ray Refinement" href="/guides/xray.html"/>
-        <item name="Troubleshooting and Reproducibility" href="/guides/Troubleshooting-and-Reproducibility.html"/>
+      <item name="Guides" href="/guides/getting-started/Preparing-a-Structure.html" collapse="true">
+        <item name="Preparing a Structure" href="/guides/getting-started/Preparing-a-Structure.html"/>
+        <item name="Key Files and Force Fields" href="/guides/getting-started/Key-Files-and-Force-Fields.html"/>
+        <item name="Input Files for FFX" href="/guides/getting-started/Input-Files.html"/>
+        <item name="Convert File Format" href="/guides/getting-started/Convert-File-Format.html"/>
+        <item name="Troubleshooting and Reproducibility" href="/guides/getting-started/Troubleshooting-and-Reproducibility.html"/>
+        <item name="Running Molecular Dynamics" href="/guides/molecular-dynamics/Running-MD.html"/>
+        <item name="Constant-pH Molecular Dynamics" href="/guides/molecular-dynamics/Constant-pH-MD.html"/>
+        <item name="OpenMM and GPU Acceleration" href="/guides/molecular-dynamics/OpenMM-GPU-Acceleration.html"/>
+        <item name="Alchemical Free Energy" href="/guides/free-energy/Alchemical-Free-Energy.html"/>
+        <item name="GPU Accelerated MC-OST Solvation Free Energy" href="/guides/free-energy/MC-OST-Solvation-Free-Energy.html"/>
+        <item name="Organic Crystal Thermodynamics" href="/guides/crystal-thermodynamics/Organic-Crystal-Thermodynamics.html"/>
+        <item name="Thermodynamic Polymorph Search" href="/guides/crystal-thermodynamics/NPT-Polymorph-Search.html"/>
+        <item name="GPU Accelerated Side-Chain Optimization" href="/guides/side-chain-optimization/GPU-Side-Chain-Optimization.html"/>
+        <item name="Side-Chain Optimization and Mutation via Many-Body DEE" href="/guides/side-chain-optimization/Many-Body-DEE.html"/>
+        <item name="AMOEBA-assisted X-ray Refinement" href="/guides/structure-refinement/X-ray-Refinement.html"/>
       </item>
       <item name="Parallelization" href="/parallel.html"/>
       <item name="Binder" href="/binder.html"/>

@@ -44,7 +44,7 @@
   --checkpoint 10.0 \
   --fileFormat XYZ \
   input_equilibrated.pdb</source>
-        <p>See the <a href="../commands/Dynamics.html">Dynamics</a> command for all options.</p>
+        <p>See the <a href="../../commands/Dynamics.html">Dynamics</a> command for all options.</p>
       </subsection>
       <subsection name="Key inputs and selections">
         <ul>

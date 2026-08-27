@@ -30,7 +30,7 @@
         </tr>
         <tr>
           <td>
-            <a href="guides/examples.html">Examples</a>
+            <a href="guides/getting-started/Examples.html">Examples</a>
           </td>
           <td>Examples including input formats, structural optimization, polymorph search and biomolecular refinement.
           </td>

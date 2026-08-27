@@ -348,21 +348,21 @@ ffxc MBAR --states states.dat --u red_potentials.dat
 
 Task-oriented tutorials:
 
-- link:guides/Preparing-a-Structure.html[Preparing a Structure]: End-to-end prep from PDB → solvation → minimization → NVT/NPT → production.
-- link:guides/Running-MD.html[Running MD]: Practical `Dynamics` usage, thermostats/barostats, I/O, restarts, and performance tips.
-- link:guides/Constant-pH-MD.html[Constant-pH MD]: Setup and run `PhEnergy`/`PhMinimize`/`PhDynamics`, titration models.
-- link:guides/Troubleshooting-and-Reproducibility.html[Troubleshooting & Reproducibility]: Common issues, diagnostics, and reproducible workflows.
+- link:guides/getting-started/Preparing-a-Structure.html[Preparing a Structure]: End-to-end prep from PDB → solvation → minimization → NVT/NPT → production.
+- link:guides/molecular-dynamics/Running-MD.html[Running MD]: Practical `Dynamics` usage, thermostats/barostats, I/O, restarts, and performance tips.
+- link:guides/molecular-dynamics/Constant-pH-MD.html[Constant-pH MD]: Setup and run `PhEnergy`/`PhMinimize`/`PhDynamics`, titration models.
+- link:guides/getting-started/Troubleshooting-and-Reproducibility.html[Troubleshooting & Reproducibility]: Common issues, diagnostics, and reproducible workflows.
 
 Worked examples:
 
-- link:guides/input.html[Input Files for FFX]: Input files and force field selection for FFX calculations.
-- link:guides/convertFileFormat.html[Convert File Format]: Conversion between CIF, PDB, and XYZ formats.
-- link:guides/gpuSideChain.html[GPU Accelerated Side-Chain Optimization]: GPU accelerated many-body side-chain optimization.
-- link:guides/dee.html[Many-Body DEE]: Side-chain optimization and mutation via Many-Body DEE.
-- link:guides/gauche.html[Organic Crystal Thermodynamics]: Absolute organic crystal thermodynamic stability.
-- link:guides/polymorphNPTsearch.html[Thermodynamic Polymorph Search]: Thermodynamic NPT organic crystal polymorph search.
-- link:guides/mcOSRWSolvationFreeEnergy.html[MC-OST Solvation Free Energy]: GPU accelerated MC-OST solvation free energy.
-- link:guides/xray.html[AMOEBA-assisted X-ray Refinement]: X-ray refinement at high and low resolution.
+- link:guides/getting-started/Input-Files.html[Input Files for FFX]: Input files and force field selection for FFX calculations.
+- link:guides/getting-started/Convert-File-Format.html[Convert File Format]: Conversion between CIF, PDB, and XYZ formats.
+- link:guides/side-chain-optimization/GPU-Side-Chain-Optimization.html[GPU Accelerated Side-Chain Optimization]: GPU accelerated many-body side-chain optimization.
+- link:guides/side-chain-optimization/Many-Body-DEE.html[Many-Body DEE]: Side-chain optimization and mutation via Many-Body DEE.
+- link:guides/crystal-thermodynamics/Organic-Crystal-Thermodynamics.html[Organic Crystal Thermodynamics]: Absolute organic crystal thermodynamic stability.
+- link:guides/crystal-thermodynamics/NPT-Polymorph-Search.html[Thermodynamic Polymorph Search]: Thermodynamic NPT organic crystal polymorph search.
+- link:guides/free-energy/MC-OST-Solvation-Free-Energy.html[MC-OST Solvation Free Energy]: GPU accelerated MC-OST solvation free energy.
+- link:guides/structure-refinement/X-ray-Refinement.html[AMOEBA-assisted X-ray Refinement]: X-ray refinement at high and low resolution.
 
 == Reproducibility tips
 

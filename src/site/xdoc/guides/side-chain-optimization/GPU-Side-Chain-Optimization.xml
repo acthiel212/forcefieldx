@@ -104,12 +104,12 @@
                 </p>
                 <p>
                     Alternatively, the previous command can be excuted using OpenMM.
-                    Please be sure OpenMM is configured by following the instructions here: <a href="modules/openmm/index.html">OpenMM Installation</a>.
+                    Please be sure OpenMM is configured by following the instructions here: <a href="../../modules/ffx-openmm/index.html">OpenMM Installation</a>.
                 </p>
                 <source>ffxc ManyBody -a 2 -l 2 -x 1 1uao.pdb_2 -Dplatform=omm</source>
             </subsection>
             <subsection name="Optimization of a Deafness Related Protein With a GPU">
-                <p> This next example is based on the deafness related COCH protein. Start by installing OpenMM by following the instructions here: <a href="modules/openmm/index.html">OpenMM Installation</a>. 
+                <p> This next example is based on the deafness related COCH protein. Start by installing OpenMM by following the instructions here: <a href="../../modules/ffx-openmm/index.html">OpenMM Installation</a>. 
                     If OpenMM is not installed, the program will run without a GPU. Next, download the coordinate file and rename it to COCH.pdb
                     (PDB <a href="https://modbase.compbio.ucsf.edu/modbase-cgi/model_details.cgi?queryfile=1527719589_2942&amp;searchmode=default&amp;displaymode=moddetail&amp;referer=yes&amp;snpflag=&amp;">COCH</a>). 
                     Perform a minimization and a GPU accelerated side-chain optimization by using the commands below:

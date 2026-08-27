@@ -23,12 +23,12 @@
                     <tr>
                         <td bgcolor="white">
                             <p align="center">
-                                <img src="images/actsite_init_small.png" alt="No Electrostatics" />
+                                <img src="../../images/actsite_init_small.png" alt="No Electrostatics" />
                             </p>
                         </td>
                         <td bgcolor="white">
                             <p align="left">
-                                <img src="images/actsite_ffx_small.png" alt="AMOEBA PME Electrostatics" />
+                                <img src="../../images/actsite_ffx_small.png" alt="AMOEBA PME Electrostatics" />
                             </p>
                         </td>
                     </tr>
@@ -157,7 +157,7 @@
                         </td>
                         <td>2.4</td>
                         <td>
-                            <a href="structures/1YI4_Ewald.pdb">1YI4_Ewald.pdb</a>
+                            <a href="../../structures/1YI4_Ewald.pdb">1YI4_Ewald.pdb</a>
                         </td>
                     </tr>
                     <tr>
@@ -173,7 +173,7 @@
                         </td>
                         <td>2.3</td>
                         <td>
-                            <a href="structures/3G75_Ewald.pdb">3G75_Ewald.pdb</a>
+                            <a href="../../structures/3G75_Ewald.pdb">3G75_Ewald.pdb</a>
                         </td>
                     </tr>
                     <tr>
@@ -189,7 +189,7 @@
                         </td>
                         <td>2.2</td>
                         <td>
-                            <a href="structures/3KCK_Ewald.pdb">3KCK_Ewald.pdb</a>
+                            <a href="../../structures/3KCK_Ewald.pdb">3KCK_Ewald.pdb</a>
                         </td>
                     </tr>
                     <tr>
@@ -205,7 +205,7 @@
                         </td>
                         <td>2.5</td>
                         <td>
-                            <a href="structures/3I60_Ewald.pdb">3I60_Ewald.pdb</a>
+                            <a href="../../structures/3I60_Ewald.pdb">3I60_Ewald.pdb</a>
                         </td>
                     </tr>
                 </tbody>

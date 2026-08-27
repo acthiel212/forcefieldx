@@ -28,7 +28,7 @@ and open the template in the editor.
                     <p>
                         This section outlines how to perform a simple solvation free energy calculation for a single water molecule in a box of water using the AMOEBA Water 2014 force
                         field. The path to scale both nonbonded forces and calculate their free energies has been impelmented such that the solvation free energy can be calculated
-                        in a single simulation. The example XYZ structure file can be found in <a href="src/site/resources/structures/waterbox.xyz">waterbox.xyz</a>
+                        in a single simulation. The example XYZ structure file can be found in <a href="../../structures/waterbox.xyz">waterbox.xyz</a>
                     </p>
                     <p>
                         The .key or .parameters file can be used to specify different parameters for the system such as which force field to use, the system size (for this system we are

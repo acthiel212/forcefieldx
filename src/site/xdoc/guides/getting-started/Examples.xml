@@ -16,7 +16,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <a href="input.html">Input File Format for Force Field X
+                        <a href="Input-Files.html">Input File Format for Force Field X
                         </a>
                     </td>
                     <td>
@@ -24,7 +24,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <a href="convertFileFormat.html">Conversion Between File Formats
+                        <a href="Convert-File-Format.html">Conversion Between File Formats
                         </a>
                     </td>
                     <td>
@@ -32,7 +32,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <a href="gpuSideChain.html">GPU Accelerated Side-Chain Optimization via Many-Body Dead-End Elimination
+                        <a href="../side-chain-optimization/GPU-Side-Chain-Optimization.html">GPU Accelerated Side-Chain Optimization via Many-Body Dead-End Elimination
                         </a>
                     </td>
                     <td>
@@ -40,7 +40,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <a href="dee.html">Side-Chain Optimization and Mutation via Many-Body DEE
+                        <a href="../side-chain-optimization/Many-Body-DEE.html">Side-Chain Optimization and Mutation via Many-Body DEE
                         </a>
                     </td>
                     <td>
@@ -48,7 +48,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <a href="gauche.html">
+                        <a href="../crystal-thermodynamics/Organic-Crystal-Thermodynamics.html">
                             Absolute Organic Crystal Thermodynamic Stability
                         </a>
                     </td>
@@ -57,7 +57,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <a href="xray.html">
+                        <a href="../structure-refinement/X-ray-Refinement.html">
                             AMOEBA-assisted X-ray Refinement at High and Low Resolution
                         </a>
                     </td>
@@ -67,7 +67,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <a href="polymorphNPTsearch.html">Organic Crystal Thermodynamic Polymorph Search
+                        <a href="../crystal-thermodynamics/NPT-Polymorph-Search.html">Organic Crystal Thermodynamic Polymorph Search
                         </a>
                     </td>
                     <td>
@@ -75,7 +75,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <a href="mcOSRWSolvationFreeEnergy.html">
+                        <a href="../free-energy/MC-OST-Solvation-Free-Energy.html">
                             GPU Accelerated MC-OST Solvation Free Energy
                         </a>
                     </td>
@@ -85,7 +85,7 @@
                 </tr>
                 <!-- tr>
                     <td>
-                        <a href="homology.html">
+                        <a href="../structure-refinement/Homology-Model-Refinement.html">
                             AMOEBA-assisted Homology Model Refinement
                         </a>
                     </td>

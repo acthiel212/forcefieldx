@@ -24,7 +24,7 @@
                     (Note: The ImportCIF converter does not generate parameters. Parameterization needs to occur prior to
                     conversion.
                     For more information on creating input files, see
-                    <a href="https://ffx.biochem.uiowa.edu/guides/input.html">here</a>). Finally, the CIF and PDB/XYZ
+                    <a href="https://ffx.biochem.uiowa.edu/guides/getting-started/Input-Files.html">here</a>). Finally, the CIF and PDB/XYZ
                     files should have different names because ImportCIF will create
                     a PDB or XYZ file (depending on the input file format) with the same name as the provided CIF.
                     The command may look something like:
@@ -60,7 +60,7 @@
                     (Note: The ImportCIF converter does not generate parameters. Parameterization needs to occur prior to
                     conversion.
                     For more information on creating input files, see
-                    <a href="https://ffx.biochem.uiowa.edu/guides/input.html">here</a>). Finally, the
+                    <a href="https://ffx.biochem.uiowa.edu/guides/getting-started/Input-Files.html">here</a>). Finally, the
                     &quot;--saveCIF&quot; or &quot;--sc&quot; flag should be added to the command.
                     The command may look something like:
                 </p>
@@ -87,7 +87,7 @@
                 <p>
                     The SaveAsPDB conversion algorithm only needs the parameterized XYZ file as input.
                     (Note: Again, parameterization needs to occur prior to conversion.
-                    For more on creating input files, see <a href="https://ffx.biochem.uiowa.edu/guides/input.html">
+                    For more on creating input files, see <a href="https://ffx.biochem.uiowa.edu/guides/getting-started/Input-Files.html">
                     here</a>).
                     <source>ffxc SaveAsPDB NAME.xyz
                     </source>

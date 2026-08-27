@@ -55,7 +55,7 @@ forcefield AMOEBA_BIO_2018
       </subsection>
       <subsection name="2) Solvate the structure in a periodic box (and optionally add ions)">
         <p>Command reference: <code>ffxc Solvator -h</code> (see the
-          <a href="../commands/Solvator.html">Solvator</a> command).
+          <a href="../../commands/Solvator.html">Solvator</a> command).
         </p>
         <p>You must provide a solvent box PDB (e.g., a water box). The repo ships with examples; a
           safe default is:
@@ -108,7 +108,7 @@ forcefield AMOEBA_BIO_2018
       </subsection>
       <subsection name="3) Energy minimization (relax bad contacts)">
         <p>Command reference: <code>ffxc Minimize -h</code> (see the
-          <a href="../commands/Minimize.html">Minimize</a> command).
+          <a href="../../commands/Minimize.html">Minimize</a> command).
         </p>
         <p>Run a short L&#8209;BFGS minimization. Start conservative on steps; increase if
           needed.
@@ -294,16 +294,16 @@ forcefield AMOEBA_BIO_2018
       </subsection>
       <subsection name="Quick reference: core commands used">
         <ul>
-          <li><a href="../commands/Solvator.html">Solvator</a>: Prepare solvent boxes and ions
+          <li><a href="../../commands/Solvator.html">Solvator</a>: Prepare solvent boxes and ions
             around a solute.
           </li>
-          <li><a href="../commands/Minimize.html">Minimize</a>: L&#8209;BFGS energy
+          <li><a href="../../commands/Minimize.html">Minimize</a>: L&#8209;BFGS energy
             minimization.
           </li>
-          <li><a href="../commands/Dynamics.html">Dynamics</a>: Time integration with
+          <li><a href="../../commands/Dynamics.html">Dynamics</a>: Time integration with
             thermostats/barostats.
           </li>
-          <li><a href="../commands/Energy.html">Energy</a>: Compute energies/gradients for spot
+          <li><a href="../../commands/Energy.html">Energy</a>: Compute energies/gradients for spot
             checks.
           </li>
         </ul>
