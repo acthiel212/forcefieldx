@@ -1,6 +1,7 @@
 Descriptions of FFX Commands and Properties are generated during build time.
 
-In addition, task-oriented Guides are available under `src/site/xdoc/guides`:
+In addition, task-oriented Guides are available under `src/site/xdoc/guides`,
+with matching AsciiDoc copies under `src/site/asciidoc/guides`:
 - getting-started/Preparing-a-Structure.xml — End-to-end prep from PDB → solvation → minimization → NVT/NPT → production.
 - molecular-dynamics/Running-MD.xml — Practical `Dynamics` usage, thermostats/barostats, I/O, restarts, and performance tips.
 - molecular-dynamics/Constant-pH-MD.xml — Setup and run `PhEnergy`/`PhMinimize`/`PhDynamics`, titration models.

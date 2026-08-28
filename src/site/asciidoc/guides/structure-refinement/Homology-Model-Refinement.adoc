@@ -1,0 +1,65 @@
+= AMOEBA-Assisted Homology Model Refinement
+Michael J. Schnieders <michael-schnieders@uiowa.edu>
+:toc:
+:icons: font
+
+The following structures represent a subset of the homology models available
+for genes that are implicated in hearing loss.
+
+|===
+|Model |Clash Score/Percentile |Poor Rotamer |MolProbity Score/Percentile |Structure
+
+|Original Structures
+|
+|
+|
+|
+
+|Gap Junction Beta-2 Protein
+|31.11/14^th^
+|5.13%
+|3.22/16^th^
+|link:../../structures/GJB2_2-217.pdb[GJB2]
+
+|POU Domain Class 3 Transcription Factor 4
+|128.08/0^th^
+|7.52%
+|3.81/4^th^
+|link:../../structures/POU3F4_189-338.pdb[POU3F4]
+
+|Espin
+|67.8/1^st^
+|1.20%
+|3.08/20^th^
+|link:../../structures/ESPN_9-336.pdb[ESPN]
+
+|Refined Structures
+|
+|
+|
+|
+
+|Gap Junction Beta-2 Protein
+|1.12/99^th^
+|0.51%
+|1.39/97^th^
+|link:../../structures/GJB2_2-217_refined.pdb[CDH23_refined]
+
+|POU Domain Class 3 Transcription Factor 4
+|1.23/99^th^
+|0.00%
+|1.28/99^th^
+|link:../../structures/POU3F4_189-338_refined.pdb[POU3F4_refined]
+
+|Espin
+|1.66/99^th^
+|0.40%
+|1.55/94^th^
+|link:../../structures/ESPN_9-336_refined.pdb[ESPN_refined]
+|===
+
+The homology models after the refinement procedure display:
+
+. Significantly fewer steric clashes
+. A higher degree of favorable side chain conformations
+. Substantial improvement in the Molprobity score

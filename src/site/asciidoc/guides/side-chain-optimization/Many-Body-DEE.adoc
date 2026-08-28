@@ -1,0 +1,113 @@
+= Side-Chain Optimization and Mutation Using Many-Body Dead-End Elimination
+Ava Lynn <ava-lynn@uiowa.edu>
+:toc:
+:icons: font
+
+Discrete rotamer libraries of optimal side-chain conformations have been developed to find the global minimum energy conformation of a protein.
+However, implementation of rotamer libraries using brute force is computationally expensive, as there exists large number of permutations.
+Through rigorous inequalities eliminating high-energy rotamers, rotamer pairs, and rotamer trimers, the Dead-End Elimination (DEE)
+algorithm eliminates many permutations, finding optimal side-chain positions in a reasonable amount of time.
+
+== Application to Mutation A3L in F5H7E5
+
+The following example demonstrates global optimization with mutation A3L in F5H7E5 (PDB
+https://swissmodel.expasy.org/repository/uniprot/F5H7E5?csm=1ACEF8ED60735148[F5H7E5]). The general protocol is as follows:
+
+. Refine/optimize the wild-type model using all-versus-all global optimization.
+If the protein is large, use the sliding window method.
+. Perform the mutation.
+. Perform a local optimization around the mutated region using a distance cutoff.
+
+== Using DEE to Globally Optimize the Wild-Type PDB File
+
+To perform an all-versus-all global optimization using DEE for all residues, use the following command:
+
+----
+ffxc ManyBody -a 2 -c A -l 2 -x 1 -dee F5H7E5.pdb
+----
+
+The resulting PDB file is automatically saved as F5H7E5.pdb_2. Rename the PDB file F5H7E5_rotOpt.pdb to remove the "_2" from the extension.
+
+== Mutating Residue 3 from Alanine to Leucine
+
+To mutate residue 3 in chain A from alanine to leucine, use the following command:
+
+----
+ffxc MutatePDB -c A -n LEU -r 3 F5H7E5_rotOpt.pdb
+----
+
+The PDB file with the mutation is saved as F5H7E5_rotOpt.pdb_2. Rename the pdb file F5H7E5_rotOpt_A3L.pdb to remove the "_2" from the extension.
+
+[cols="1,3"]
+|===
+|Command |Description
+
+|-c A
+|Chain 'A'
+
+|-n LEU
+|Three-letter abbreviation of mutated amino acid
+
+|-r 3
+|Residue 3 is mutated
+|===
+
+== Using DEE to Optimize the Mutated Region
+
+To perform an all-versus-all global optimization using DEE for all residues, use the following command:
+
+----
+ffxc ManyBody -a 2 -c A -l 2 -x 1 -dee F5H7E5_rotOpt_A3L.pdb
+----
+
+To perform a global optimization using DEE within the residue range 1-5, use the following command:
+
+----
+ffxc ManyBody -a 2 -c A -l 2 -s 1 -f 5 -dee F5H7E5_rotOpt_A3L.pdb
+----
+
+To perform a global optimization using DEE within a distance cutoff of 5 Angstroms from residue 3, use the following command:
+
+----
+ffxc ManyBody -a 4 -c A -l 2 -s 3 -f 3 -w 1 -r 5.0 -dee F5H7E5_rotOpt_A3L.pdb
+----
+
+A description of all of the flags used in the optimization commands is found below:
+
+[cols="1,3"]
+|===
+|Command |Description
+
+|-a 2
+|Algorithm using Goldstein elimination
+
+|-a 4
+|Algorithm using sliding window method
+
+|-c A
+|Chain 'A'
+
+|-f 5
+|Final residue 5
+
+|-dee
+|Goldstein criteria not used
+
+|-l 2
+|Richardson rotamer library
+
+|-r 5.0
+|Distance cutoff of 5.0 Angstroms
+
+|-s 1
+|Starting residue 1
+
+|-t
+|Turn on three-body interactions
+
+|-w 1
+|Sliding window size of 1 residue
+
+|-x 1
+|Optimization of all residues
+|===

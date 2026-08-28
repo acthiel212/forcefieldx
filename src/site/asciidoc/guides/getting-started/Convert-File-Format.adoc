@@ -1,0 +1,134 @@
+= File Format Conversion
+Aaron Nessler <aaron-nessler@uiowa.edu>
+:toc:
+:icons: font
+
+The FFX software package contains a very powerful and ever expanding library of functions to aid in a
+variety of computational chemistry endeavors. However, it is impossible to utilize FFX without
+files that are formatted in a manner that FFX can handle.
+
+== Conversion Between CIF and PDB or XYZ Formats
+
+The following is a brief and general guide on how to convert between CIF and PDB or XYZ formats.
+
+=== Conversion from CIF to PDB or XYZ
+
+The ImportCIF conversion algorithm in FFX relies on two input files. The first being the CIF we
+wish to convert. The second is a PDB or XYZ file that will supply parameters for the converted structure
+(Note: The ImportCIF converter does not generate parameters. Parameterization needs to occur prior to
+conversion.
+For more information on creating input files, see
+https://ffx.biochem.uiowa.edu/guides/getting-started/Input-Files.html[here]). Finally, the CIF and PDB/XYZ
+files should have different names because ImportCIF will create
+a PDB or XYZ file (depending on the input file format) with the same name as the provided CIF.
+The command may look something like:
+
+----
+ffxc ImportCIF NAME.cif NAME.pdb
+or
+ffxc ImportCIF NAME.cif NAME.xyz
+----
+
+There should be a newly generated PDB/XYZ and Properties file with the same name as the selected CIF
+file (in the above examples: NAME.pdb and NAME.properties or NAME.xyz and NAME.properties,
+respectively). The files should be ready for further
+calculations, but it is recommended that Minimize and/or MinimizeCrystals is performed as newly
+converted files tend to be in strained conformations with respect to the applied model.
+
+ImportCIF can handle appended CIFs, however, in the case of XYZ format, the space group of the CIF will be appended to the
+file name as appended CIFs may have different space groups, but appended XYZ (aka ARC) files must
+consist of a single space group specified in the Properties file (_e.g._ NAME_P21c.arc
+and NAME_P21c.properties). ImportCIF can attempt to fix crystal parameters to conform to the supplied
+lattice system, but since this alters the structure from the original CIF, the user must indicate
+that this is desired by adding the "--fixLattice" or "--fl" flag to the command. The default values
+are sufficient for most cases, but additional options can be seen through the help message:
+
+----
+ffxc ImportCIF --help
+----
+
+=== From PDB or XYZ to CIF
+
+The ImportCIF conversion algorithm also allows for the conversion to CIF format. However, this will
+require a PDB or XYZ file that has been parameterized.
+(Note: The ImportCIF converter does not generate parameters. Parameterization needs to occur prior to
+conversion.
+For more information on creating input files, see
+https://ffx.biochem.uiowa.edu/guides/getting-started/Input-Files.html[here]). Finally, the
+"--saveCIF" or "--sc" flag should be added to the command.
+The command may look something like:
+
+----
+ffxc ImportCIF --sc NAME.xyz
+----
+
+The result from the above command should be a generally formatted CIF with the coordinates and
+crystallographic information of the original XYZ.
+
+=== Utilized Software
+
+The ImportCIF converter uses CIFTools provided by the RCSB
+(https://github.com/rcsb/ciftools-java[CIFTools]^1^) and objects provided by
+the Chemistry Development Kit (https://cdk.github.io[CDK]^2^)
+
+== Conversion Between PDB and XYZ Formats
+
+The following is a brief and general guide on how to convert between PDB and XYZ formats.
+
+=== Conversion from XYZ to PDB
+
+The SaveAsPDB conversion algorithm only needs the parameterized XYZ file as input.
+(Note: Again, parameterization needs to occur prior to conversion.
+For more on creating input files, see
+https://ffx.biochem.uiowa.edu/guides/getting-started/Input-Files.html[here]).
+
+----
+ffxc SaveAsPDB NAME.xyz
+----
+
+This is sufficient to generate the PDB file, however PDB files inherently do not contain
+model parameters. Therefore, if you wish to use parameters on a PDB file that
+contains definitions outside the default force field of interest, Biotype records should be appended
+to either the corresponding PATCH or KEY/PROPERTIES file. Prior to the generation of Biotype records,
+each atom should have a unique name (_e.g._ a series of carbons "C"
+"C" "C"... could be replaced by "C1" "C2" "C3"...
+_etc._).
+Biotype records can be generated with the following command:
+
+----
+ffxc Biotype NAME.xyz
+----
+
+The resulting Biotype record should have a format similar to the following:
+
+----
+biotype    1  O1  "NAME         "  415 C11
+----
+
+The first column specifies the information contained (a Biotype record), the second an atom index (1),
+the third the atom name (O1), the fourth is the molecule name (NAME), the fifth the atom type or
+parameter identifier, and finally bonded information (in this case O1 is bonded to a carbon, C11).
+(Note: The PDB residue name and the Biotype molecule name must match. SaveAsPDB uses the default
+residue name of MOL, which signifies water in FFX, so you will likely want to change the PDB residue
+name if you intend to analyze your PDB file with a model.)
+
+=== Conversion from PDB to XYZ
+
+If you are utilizing parameters outside the default force field, you will need to have access to
+Biotype records to map the parameters to the corresponding atoms. Assuming all atoms in the system
+are defined (either by the force field or seperate parameter file) the following command should be
+sufficient to convert a PDB file to an XYZ:
+
+----
+ffxc SaveAsXYZ NAME.xyz
+----
+
+== References:
+
+_1. Sehnal D, Bittrich S, Velankar S, Koča J, Svobodová R, Burley SK, Rose AS (2020)
+BinaryCIF and CIFTools—Lightweight, efficient and extensible macromolecular data management.
+PLoS Comput Biol 16(10): e1008247. https://doi.org/10.1371/journal.pcbi.1008247_
+
+_2. Willighagen et al. The Chemistry Development Kit (CDK) v2.0: atom typing, depiction,
+molecular formulas, and substructure searching. J. Cheminform. 2017; 9(3),
+doi:10.1186/s13321-017-0220-4_

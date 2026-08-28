@@ -1,0 +1,120 @@
+= Ewald X-Ray Refinement
+Michael J. Schnieders <michael-schnieders@uiowa.edu>
+:toc:
+:icons: font
+
+Original (1YI4, No Electrostatics)
+
+image::../../images/actsite_init_small.png[No Electrostatics]
+
+Ewald Refinement of the Binding Pocket
+
+image::../../images/actsite_ffx_small.png[AMOEBA PME Electrostatics]
+
+In collaboration with scientists at Vertex Pharmacueticals, we are using the
+polarizable AMOEBA force field evaluated using Ewald summation to re-refine
+protein-drug structures in the context of the original diffraction data (ie. using
+an X-ray likelihood target) in order to provide the most precise atomic
+resolution models possible.
+
+|===
+|Model |R/R~free~ |Clash Score/% |Poor Rotamer |Rama. Favored |MolProbity Score/% |Res. (A) |Structure
+
+|Original Refinements
+|
+|
+|
+|
+|
+|
+|
+
+|PIM-1 Bound to Adenosine
+|20.22/23.49
+|24.91/46^th^
+|7.56%
+|93.92%
+|2.96/33^rd^
+|2.4
+|http://www.rcsb.org/pdb/explore/explore.do?structureId=1YI4[1YI4]
+
+|Staphylococcus Aureus Gyrase B with Inhibitor
+|23.09/32.49
+|33.93/20^th^
+|5.45%
+|94.78%
+|2.93/28^th^
+|2.3
+|http://www.rcsb.org/pdb/explore/explore.do?structureId=3G75[3G75]
+
+|Janus Kinase Bound to Inhibitor
+|22.07/28.60
+|18.87/54^th^
+|5.75%
+|96.80%
+|2.55/47^th^
+|2.2
+|http://www.rcsb.org/pdb/explore/explore.do?structureId=3KCK[3KCK]
+
+|Extracellular Signal-Regulated Kinase (ERK2) with Inhibitor
+|20.60/24.54
+|11.41/94^th^
+|3.65%
+|97.26%
+|2.14/92^nd^
+|2.5
+|http://www.rcsb.org/pdb/explore/explore.do?structureId=3I60[3I60]
+
+|Ewald Refinements
+|
+|
+|
+|
+|
+|
+|
+
+|PIM-1 Bound to Adenosine
+|17.76/22.37
+|3.42/99^th^
+|7.08%
+|95.85%
+|2.07/91^st^
+|2.4
+|link:../../structures/1YI4_Ewald.pdb[1YI4_Ewald.pdb]
+
+|Staphylococcus Aureus Gyrase B with Inhibitor
+|20.64/30.48
+|3.74/99^th^
+|5.13%
+|93.68%
+|2.12/85^th^
+|2.3
+|link:../../structures/3G75_Ewald.pdb[3G75_Ewald.pdb]
+
+|Janus Kinase Bound to Inhibitor
+|20.83/28.13
+|1.67/99^th^
+|4.56%
+|97.17%
+|1.57/93^rd^
+|2.2
+|link:../../structures/3KCK_Ewald.pdb[3KCK_Ewald.pdb]
+
+|Extracellular Signal-Regulated Kinase (ERK2) with Inhibitor
+|18.55/26.66
+|3.41/99^th^
+|4.32%
+|96.96%
+|1.79/98^th^
+|2.5
+|link:../../structures/3I60_Ewald.pdb[3I60_Ewald.pdb]
+|===
+
+Compared to the original models, the Ewald refinements exhibit:
+
+. Improved agreement with the data (lower R~free~ values)
+. Fewer van der Waals clashes
+. A greater percentage of favorable Ramachandran backbone conformations
+. Overall improvement of MolProbity score
+. Refinement of the hydrogen-bonding network within the binding pocket

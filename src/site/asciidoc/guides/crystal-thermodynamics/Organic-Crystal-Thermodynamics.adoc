@@ -1,0 +1,157 @@
+= Absolute Organic Crystal Thermodynamic Stability
+Julia Park <jooyeon-park@uiowa.edu>
+:toc:
+:icons: font
+
+== Growth of the Asymmetric Unit into a Crystal via Alchemy (GAUCHE)
+
+The general procedure for calculating the organic crystal deposition/sublimation
+free energy using GAUCHE method is as follows:
+
+. Calculate the deposition free energy of the asymmetric unit.
+. Find the energy minimized crystal structure by optimizing the snapshots of the initial deposition simulation.
+. Calculate the free energy to add a harmonic restraint to each atom of the asymmetric unit between its current simulation coordinates and those of the energy minimized crystal.
+. Calculate the free energy change to transfer the restrained asymmetric unit molecules into vapor by alchemical annihilation.
+. Repeat the third and fourth steps using the unit cell instead of the asymmetric unit.
+
+To do the deposition/sublimation free energy calculation, we need an input coordinate file in TINKER XYZ (or PDB) format.
+In this example, we are using acetanilide (ACANIL).
+
+----
+19  ACANIL.xyz
+1    C   -1.62567502    4.09801640    2.43458664   401       2      11      12      13
+2    C   -0.21564232    4.56925851    2.09474698   402       1       3       4
+3    O    0.18378795    5.64372837    2.46911645   409       2
+4    N    0.54676489    3.70436855    1.35104344   403       2       5      14
+5    C    1.87236284    3.80268207    0.80739919   405       4       6      10
+6    C    2.36589527    2.78623691   -0.02894495   404       5       7      15
+7    C    3.66232337    2.84237728   -0.53485617   406       6       8      16
+8    C    4.51553157    3.88888100   -0.21210739   407       7       9      17
+9    C    4.02180870    4.91434631    0.58187883   406       8      10      18
+10   C    2.71900496    4.89224328    1.07367960   404       5       9      19
+11   H   -2.06287504    3.50784974    1.63545511   408       1
+12   H   -2.29053235    4.93747119    2.60633250   408       1
+13   H   -1.61366036    3.49096299    3.33493674   408       1
+14   H    0.21515865    2.76325126    1.34137220   411       4
+15   H    1.73971134    1.95334763   -0.27147787   410       6
+16   H    4.00461342    2.04830814   -1.17749156   412       7
+17   H    5.52996679    3.90951933   -0.56800284   413       8
+18   H    4.65698146    5.74431910    0.83904803   412       9
+19   H    2.38670936    5.70593100    1.68161589   410      10
+----
+
+The property file (like a TINKER keyword file) specifies the crystal information. Note
+that for most of the small organic molecules, AMOEBA parameters are not published thus
+need to be parameterized for each molecule (PolType Program developed by Pengyu Ren Research
+Group can be used for this purpose). Van der Waals cutoff is specified here, and the
+parameters and patch specifications point to acetanilide AMOEBA parameters link:../../parameters/ACANIL.patch[ACANIL.patch].
+
+----
+spacegroup Pbca
+
+a-axis    19.640
+b-axis    9.483
+c-axis    7.979
+alpha     90.00
+beta      90.00
+gamma     90.00
+
+vdw-cutoff  12.0
+
+parameters ACANIL.patch
+patch      ACANIL.patch
+----
+
+The command to calculate the deposition free energy of the asymmetric unit is as follows:
+
+----
+ffxc Thermodynamics -c 100 -a -l 0.0 -i stochastic -n 25000000 -t 298.15 -r 1.0 -s 1 -f 19 ACANIL.xyz
+----
+
+[cols="1,3"]
+|===
+|Flag |Description
+
+|-c 100
+|Number of MD steps between OST counts
+
+|-a
+|Asynchronous walker communication
+
+|-l 0.0
+|Initial lambda value of 0.0 (vapor)
+
+|-i stochastic
+|Stochastic integrator specifying stochastic dynamics
+
+|-n 25000000
+|Number of MD steps
+
+|-t 298.15
+|Temperature
+
+|-r 1.0
+|Interval to report thermodynamics (psec)
+
+|-s 1
+|Softcore start atom
+
+|-f 19
+|Softcore final atom
+|===
+
+If experimental crystal structure is available, optimize the experimental structure to use
+for the remaining GAUCHE steps. Specify the RMS gradient convergence criteria using -e flag.
+Rename the output, i.e. energy minimized structure, as min.SG.xyz, or any naming convention
+that indicates that the coordinate file contains energy optimized asymmetric unit.
+
+----
+ffxc minimize -e 1e-4 ACANIL.xyz
+----
+
+To do the expansion of the asymmetric unit into a unit cell, some modifications to the properties
+files are necessary. For restrained crystal and restrained vapor, add "restrainterm true". For
+restrained vapor, also add "vdwterm false".
+
+----
+ffxc Thermodynamics -c 100 -a -l 2.0 -i stochastic -n 5000000 -t 298.15 -r 1.0 rminv.SG.xyz rmin.SG.xyz
+----
+
+The command to calculate the free energy of adding a harmonic restraint to the asymmetric unit is as follows:
+
+----
+ffxc Thermodynamics -c 100 -a -l 2.0 -i stochastic -n 5000000 -t 298.15 -r 1.0 rmin.SG.xyz min.SG.xyz
+----
+
+[cols="1,3"]
+|===
+|Flag |Description
+
+|-l 2.0
+|Lambda value greater than 1.0 distributes lambda across walkers
+
+|rmin.SG.xyz
+|refers to the restrained energy minimized asymmetric unit
+
+|min.SG.xyz
+|refers to the energy minimized asymmetric unit
+|===
+
+The command to calculate the free energy change to transfer the restrained asymmetric
+unit molecules into vapor by alchemical annihilation is as follows:
+
+----
+ffxc Thermodynamics -c 100 -a -l 2.0 -i stochastic -n 5000000 -t 298.15 -r 1.0 rminv.SG.xyz rmin.SG.xyz
+----
+
+rminv.SG.xyz refers to the restrained vapor state of the asymmetric unit, and
+the rest of the commands are the same as the previous step.
+
+Unit cell calculations are the same as the previous two steps. However, the coordinate
+file includes multiple copies of the molecule according to the number of symmetry operators
+for the spacegroup. The property file should also indicate the spacegroup of the molecule as P1.
+FFX command to generate a unit cell coordinate file is:
+
+----
+ffxc saveAsP1 min.SG.xyz
+----
